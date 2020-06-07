@@ -17,7 +17,7 @@
         }
 
         td.user-name {
-
+            font-weight: normal;
         }
 
         td.week-day {
@@ -27,7 +27,6 @@
 
         td {
             font-size: 20px;
-            /*background-color: #fff8dc;*/
         }
 
         td.submitted-8h {

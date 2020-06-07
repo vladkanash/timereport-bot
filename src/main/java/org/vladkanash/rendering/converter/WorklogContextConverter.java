@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public class WorklogContextConverter {
 
     public static final String AVATAR_SIZE = "48x48";
-    public static final String HOUR = "h";
+    public static final int DAYS_IN_WEEK = 7;
 
     public static WorklogContext convert(Stream<Worklog> worklogs) {
         var weekWorklog = new WorklogContext();
@@ -31,7 +31,7 @@ public class WorklogContextConverter {
     }
 
     private static List<String> getCurrentWeekDays() {
-        return IntStream.rangeClosed(1, 7)
+        return IntStream.rangeClosed(1, DAYS_IN_WEEK)
                 .mapToObj(TimeUtils::getCurrentDayOfWeekDate)
                 .map(TimeUtils::getDisplayDay)
                 .collect(Collectors.toList());
@@ -73,6 +73,6 @@ public class WorklogContextConverter {
         var totalSeconds = userWorklogs.stream()
                 .mapToInt(Worklog::getReportedSeconds)
                 .sum();
-        return (totalSeconds / 3600) + HOUR;
+        return String.valueOf(totalSeconds / 3600);
     }
 }
