@@ -17,33 +17,27 @@ import java.util.stream.Stream;
 public class JiraWorklogService {
 
     private static final String ISSUES = "issues";
+    private static final Gson gson = new Gson();
 
-    private final Gson gson = new Gson();
-    private final JiraRestApiService restService;
-
-    public JiraWorklogService(JiraRestApiService restService) {
-        this.restService = restService;
-    }
-
-    public Stream<Worklog> getUserWorklogs(String jqlQuery) {
-        return restService.searchQuery(jqlQuery)
+    public static Stream<Worklog> getUserWorklogs(String jqlQuery) {
+        return JiraRestApiService.searchQuery(jqlQuery)
                 .stream()
-                .flatMap(this::parseResponse);
+                .flatMap(JiraWorklogService::parseResponse);
     }
 
-    private Stream<Worklog> getIssueWorklog(String issueCode) {
-        return restService.getWorklogsForIssue(issueCode)
+    private static Stream<Worklog> getIssueWorklog(String issueCode) {
+        return JiraRestApiService.getWorklogsForIssue(issueCode)
                 .map(json -> gson.fromJson(json.toString(), Issue.Fields.Worklog.class))
                 .map(Issue.Fields.Worklog::getWorklogs)
                 .stream()
                 .flatMap(Collection::stream);
     }
 
-    private Stream<Worklog> parseResponse(JSONObject response) {
+    private static Stream<Worklog> parseResponse(JSONObject response) {
         var issuesArray = response.getJSONArray(ISSUES);
         var partitionedIssues = parseIssues(issuesArray)
                 .stream()
-                .collect(Collectors.partitioningBy(this::isDirectCallRequired));
+                .collect(Collectors.partitioningBy(JiraWorklogService::isDirectCallRequired));
 
         var worklogs = partitionedIssues.get(Boolean.FALSE)
                 .stream()
@@ -54,18 +48,18 @@ public class JiraWorklogService {
         var directCallWorklogs = partitionedIssues.get(Boolean.TRUE)
                 .stream()
                 .map(Issue::getCode)
-                .flatMap(this::getIssueWorklog);
+                .flatMap(JiraWorklogService::getIssueWorklog);
 
         return Stream.concat(worklogs, directCallWorklogs);
     }
 
-    private List<Issue> parseIssues(JSONArray issuesArray) {
+    private static List<Issue> parseIssues(JSONArray issuesArray) {
         Type issuesList = new TypeToken<ArrayList<Issue>>() {
         }.getType();
         return gson.fromJson(issuesArray.toString(), issuesList);
     }
 
-    private boolean isDirectCallRequired(Issue issue) {
+    private static boolean isDirectCallRequired(Issue issue) {
         return issue.getFields().getWorklog().getMaxResults() <= issue.getFields().getWorklog().getWorklogs().size();
     }
 }

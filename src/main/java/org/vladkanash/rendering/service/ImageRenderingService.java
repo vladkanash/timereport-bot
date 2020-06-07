@@ -10,6 +10,7 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.vladkanash.jira.entity.Worklog;
 import org.vladkanash.rendering.converter.WorklogContextConverter;
 
+import java.awt.image.BufferedImage;
 import java.io.StringWriter;
 import java.util.Properties;
 import java.util.stream.Stream;
@@ -18,7 +19,7 @@ public class ImageRenderingService {
 
     public static final String TEMPLATE_NAME = "reportTemplate.vm";
 
-    public void renderWorklogReportImage(Stream<Worklog> worklogs) {
+    public BufferedImage renderWorklogReportImage(Stream<Worklog> worklogs) {
         initVelocity();
 
         try {
@@ -29,16 +30,17 @@ public class ImageRenderingService {
             var html = sw.toString();
             System.out.println(html);
 
-            createImage(html);
+            return createImage(html);
         } catch (ResourceNotFoundException | MethodInvocationException | ParseErrorException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
-    private void createImage(String html) {
+    private BufferedImage createImage(String html) {
         var imageRenderer = Html2Image.fromHtml(html).getImageRenderer();
         imageRenderer.setAutoHeight(true);
-        imageRenderer.saveImage("time-report.png");
+        return imageRenderer.getBufferedImage();
     }
 
     private VelocityContext createContext(Stream<Worklog> worklogs) {
