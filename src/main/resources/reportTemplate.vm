@@ -10,10 +10,35 @@
         }
 
         html * {
-            font-size: 1em !important;
+            font-weight: bold;
+            font-size: 16px;
             color: #000 !important;
             font-family: Arial, serif !important;
         }
+
+        td.user-name {
+
+        }
+
+        td.week-day {
+            font-weight: normal;
+            font-size: 15px;
+        }
+
+        td {
+            font-size: 20px;
+            /*background-color: #fff8dc;*/
+        }
+
+        td.submitted-8h {
+            font-size: 20px;
+            background-color: #00ff7f;
+        }
+
+        .submitted-0h {
+            background-color: #f08080;
+        }
+
     </style>
     <title>
         Time Report
@@ -35,7 +60,7 @@
     </tr>
     <tr>
         #foreach($day in ${context.weekDays})
-            <td>$day</td>
+            <td class="week-day">$day</td>
         #end
     </tr>
     </thead>
@@ -45,14 +70,17 @@
             <td>
                 <img src="${user.avatarUrl}" alt="user avatar">
             </td>
-            <td>
-                ${user.name}
-            </td>
+            <td class="user-name">${user.name}</td>
             #foreach($day in ${context.weekDays})
                 #if(${user.submittedTime.get($day)})
-                    <td>${user.submittedTime.get($day)}</td>
+                    #set($submittedHours = ${user.submittedTime.get($day)})
+                    <td class="submitted-$submittedHours">
+                        $submittedHours
+                    </td>
                 #else
-                    <td>$zeroHours</td>
+                    <td class="submitted-0h">
+                        $zeroHours
+                    </td>
                 #end
             #end
             #if($user.totalTime)
