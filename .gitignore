@@ -1,0 +1,5 @@
+**/resources/*.properties
+.idea/
+.build/
+.gradle/
+*.png

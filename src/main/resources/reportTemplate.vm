@@ -1,0 +1,68 @@
+#set($zeroHours = '0h')
+
+<html lang="en">
+<head>
+    <style>
+        table td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 5px;
+        }
+
+        html * {
+            font-size: 1em !important;
+            color: #000 !important;
+            font-family: Arial, serif !important;
+        }
+    </style>
+    <title>
+        Time Report
+    </title>
+</head>
+<body>
+<table>
+    <thead>
+    <tr>
+        <td rowspan="2" colspan="2">
+            User
+        </td>
+        <td colspan="7">
+            ${context.currentMonth}
+        </td>
+        <td rowspan="2">
+            Total Hours
+        </td>
+    </tr>
+    <tr>
+        #foreach($day in ${context.weekDays})
+            <td>$day</td>
+        #end
+    </tr>
+    </thead>
+    <tbody>
+        #foreach($user in ${context.userWorklogs})
+        <tr>
+            <td>
+                <img src="${user.avatarUrl}" alt="user avatar">
+            </td>
+            <td>
+                ${user.name}
+            </td>
+            #foreach($day in ${context.weekDays})
+                #if(${user.submittedTime.get($day)})
+                    <td>${user.submittedTime.get($day)}</td>
+                #else
+                    <td>$zeroHours</td>
+                #end
+            #end
+            #if($user.totalTime)
+                <td>$user.totalTime</td>
+            #else
+                <td>$zeroHours</td>
+            #end
+        </tr>
+        #end
+    </tbody>
+</table>
+</body>
+</html>
