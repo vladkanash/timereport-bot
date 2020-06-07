@@ -6,15 +6,16 @@ import org.vladkanash.jira.service.JiraWorklogService;
 import org.vladkanash.jira.util.RequestUtils;
 import org.vladkanash.rendering.service.ImageRenderingService;
 import org.vladkanash.util.TimeUtils;
-import org.vladkanash.util.Config;
 
 import java.util.List;
+
+import static org.vladkanash.util.Config.CONFIG;
 
 public class Main {
 
     public static void main(String[] args) {
-        var users = Config.INSTANCE.getList("jira.users.list");
-        var rawQuery = Config.INSTANCE.get("jira.rest.worklog.query");
+        var users = CONFIG.getList("jira.users.list");
+        var rawQuery = CONFIG.get("jira.rest.worklog.query");
         var query = RequestUtils.createWorklogSearchQuery(rawQuery, users);
 
         var worklogService = new JiraWorklogService(createApiService());
@@ -27,14 +28,12 @@ public class Main {
     }
 
     private static JiraRestApiService createApiService() {
-        var config = Config.INSTANCE;
-
         return JiraRestApiService.builder()
-                .token(config.get("jira.auth.token"))
-                .username(config.get("jira.auth.user"))
-                .serverUri(config.get("jira.server.uri"))
-                .searchEndpoint(config.get("jira.rest.endpoint.search"))
-                .worklogEndpoint(config.get("jira.rest.endpoint.worklog"))
+                .token(CONFIG.get("jira.auth.token"))
+                .username(CONFIG.get("jira.auth.user"))
+                .serverUri(CONFIG.get("jira.server.uri"))
+                .searchEndpoint(CONFIG.get("jira.rest.endpoint.search"))
+                .worklogEndpoint(CONFIG.get("jira.rest.endpoint.worklog"))
                 .build();
     }
 

@@ -19,27 +19,32 @@ public class ImageRenderingService {
     public static final String TEMPLATE_NAME = "reportTemplate.vm";
 
     public void renderWorklogReportImage(Stream<Worklog> worklogs) {
-
         initVelocity();
-
-        VelocityContext context = new VelocityContext();
-        context.put("context", WorklogContextConverter.convert(worklogs));
 
         try {
             Template template = Velocity.getTemplate(TEMPLATE_NAME);
             StringWriter sw = new StringWriter();
+            var context = createContext(worklogs);
             template.merge(context, sw);
-
             var html = sw.toString();
             System.out.println(html);
 
-            var imageRenderer = Html2Image.fromHtml(html).getImageRenderer();
-            imageRenderer.setAutoHeight(true);
-            imageRenderer.saveImage("hello-world.png");
-
+            createImage(html);
         } catch (ResourceNotFoundException | MethodInvocationException | ParseErrorException e) {
             e.printStackTrace();
         }
+    }
+
+    private void createImage(String html) {
+        var imageRenderer = Html2Image.fromHtml(html).getImageRenderer();
+        imageRenderer.setAutoHeight(true);
+        imageRenderer.saveImage("time-report.png");
+    }
+
+    private VelocityContext createContext(Stream<Worklog> worklogs) {
+        VelocityContext context = new VelocityContext();
+        context.put("context", WorklogContextConverter.convert(worklogs));
+        return context;
     }
 
     private void initVelocity() {

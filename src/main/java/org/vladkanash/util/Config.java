@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 public enum Config {
-    INSTANCE;
+    CONFIG;
 
     private static final String LIST_DELIMITER = ",";
     private static final String PATH = "config.properties";
