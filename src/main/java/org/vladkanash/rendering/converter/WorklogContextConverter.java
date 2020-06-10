@@ -6,6 +6,8 @@ import org.vladkanash.rendering.context.UserWeekWorklog;
 import org.vladkanash.rendering.context.WorklogContext;
 import org.vladkanash.util.TimeUtils;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,20 +71,20 @@ public class WorklogContextConverter {
         result.setUserId(worklog.getAuthor().getAccountId());
         result.setName(worklog.getAuthor().getDisplayName());
         result.setAvatarUrl(worklog.getAuthor().getAvatarUrls().getOrDefault(AVATAR_SIZE, ""));
-        result.setSubmittedTime(getReportedSeconds(userWorklogs));
+        result.setSubmittedTime(getReportedTime(userWorklogs));
         result.setTotalTime(getTotalTime(userWorklogs));
         return result;
     }
 
-    private static Map<String, String> getReportedSeconds(List<Worklog> userWorklogs) {
-        return userWorklogs.stream()
+    private static Map<String, String> getReportedTime(List<Worklog> userWorklogs) {
+        var reportedTime = userWorklogs.stream()
                 .collect(Collectors.groupingBy(work ->
-                        TimeUtils.toLocalDate(work.getSubmissionDate())))
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        e -> TimeUtils.getDisplayDay(e.getKey()),
-                        e -> getTotalTime(e.getValue())));
+                        TimeUtils.toLocalDate(work.getSubmissionDate())));
+
+        return TimeUtils.getCurrentDayOfWeekDate(1)
+                .datesUntil(LocalDate.now())
+                .collect(Collectors.toMap(TimeUtils::getDisplayDay,
+                        date -> getTotalTime(reportedTime.getOrDefault(date, Collections.emptyList()))));
     }
 
     private static String getTotalTime(List<Worklog> userWorklogs) {

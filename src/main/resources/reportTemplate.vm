@@ -44,6 +44,17 @@
             width: 50px;
         }
 
+        td.submitted-1,
+        td.submitted-2,
+        td.submitted-3,
+        td.submitted-4,
+        td.submitted-5,
+        td.submitted-6,
+        td.submitted-7{
+            font-size: 28px;
+            background-color: #ffe952;
+        }
+
         td.submitted-8 {
             font-size: 28px;
             background-color: #00ff7f;
@@ -53,7 +64,7 @@
             font-size: 24px;
         }
 
-        td.submitted-0 {
+        td.submitted-0.past {
             width: 50px !important;
             font-size: 28px;
             background-color: #f08080;
@@ -95,12 +106,11 @@
             #foreach($day in ${context.weekDays})
                 #if(${user.submittedTime.get($day)})
                     #set($submittedHours = ${user.submittedTime.get($day)})
-                    <td class="submitted-$submittedHours">
+                    <td class="submitted-$submittedHours past">
                         $submittedHours
                     </td>
                 #else
                     <td class="submitted-0">
-                        $zeroHours
                     </td>
                 #end
             #end
