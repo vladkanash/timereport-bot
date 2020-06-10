@@ -26,7 +26,7 @@ public class TimeUtils {
     }
 
     public static String getDisplayDay(LocalDate date) {
-        return date.format(DateTimeFormatter.ofPattern("EEEE, dd"));
+        return date.format(DateTimeFormatter.ofPattern("EEE, dd"));
     }
 
     public static String getDisplayMonth(LocalDate date) {

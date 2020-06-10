@@ -1,10 +1,15 @@
-#set($zeroHours = '0h')
+#set($zeroHours = '0')
 
 <html lang="en">
 <head>
     <style>
+        table {
+            width: 100%;
+            table-layout: fixed;
+        }
+
         table td {
-            border: 1px solid black;
+            border: 1px solid #404040;
             text-align: center;
             padding: 5px;
         }
@@ -12,32 +17,47 @@
         html * {
             font-weight: bold;
             font-size: 16px;
-            color: #000 !important;
-            font-family: Arial, serif !important;
+            color: #353535 !important;
+            font-family: Arial, sans-serif !important;
         }
 
         td.user-name {
+            width: 150px;
             font-weight: normal;
+            font-size: 20px;
         }
 
         td.week-day {
+            width: 50px;
             font-weight: normal;
             font-size: 15px;
         }
 
         td {
+            width: 50px;
+            overflow: hidden;
+            white-space: nowrap;
             font-size: 20px;
         }
 
-        td.submitted-8h {
-            font-size: 20px;
+        td.user-avatar {
+            width: 50px;
+        }
+
+        td.submitted-8 {
+            font-size: 28px;
             background-color: #00ff7f;
         }
 
-        .submitted-0h {
-            background-color: #f08080;
+        td.total-hours {
+            font-size: 24px;
         }
 
+        td.submitted-0 {
+            width: 50px !important;
+            font-size: 28px;
+            background-color: #f08080;
+        }
     </style>
     <title>
         Time Report
@@ -47,14 +67,16 @@
 <table>
     <thead>
     <tr>
-        <td rowspan="2" colspan="2">
+        <td rowspan="2" colspan="4">
             User
         </td>
-        <td colspan="7">
-            ${context.currentMonth}
-        </td>
+        #foreach($month in ${context.monthData})
+            <td colspan="$month.daysCount">
+                ${month.name}
+            </td>
+        #end
         <td rowspan="2">
-            Total Hours
+            Total
         </td>
     </tr>
     <tr>
@@ -66,10 +88,10 @@
     <tbody>
         #foreach($user in ${context.userWorklogs})
         <tr>
-            <td>
+            <td class="user-avatar">
                 <img src="${user.avatarUrl}" alt="user avatar">
             </td>
-            <td class="user-name">${user.name}</td>
+            <td class="user-name" colspan="3">${user.name}</td>
             #foreach($day in ${context.weekDays})
                 #if(${user.submittedTime.get($day)})
                     #set($submittedHours = ${user.submittedTime.get($day)})
@@ -77,16 +99,18 @@
                         $submittedHours
                     </td>
                 #else
-                    <td class="submitted-0h">
+                    <td class="submitted-0">
                         $zeroHours
                     </td>
                 #end
             #end
-            #if($user.totalTime)
-                <td>$user.totalTime</td>
-            #else
-                <td>$zeroHours</td>
-            #end
+            <td class="total-hours">
+                #if($user.totalTime)
+                    ${user.totalTime}h
+                #else
+                    ${zeroHours}h
+                #end
+            </td>
         </tr>
         #end
     </tbody>

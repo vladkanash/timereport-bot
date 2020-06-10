@@ -18,7 +18,7 @@ public class SlackService {
         var url = CONFIG.get("slack.url.file.upload");
         var shareUrl = CONFIG.get("slack.url.file.share");
         var channel = CONFIG.get("slack.channel.id");
-        var messageUrl = CONFIG.get("slack.url.webhook");
+        var webhookUrl = CONFIG.get("slack.url.webhook");
 
         var inputStream = getStreamForImage(image);
 
@@ -59,7 +59,7 @@ public class SlackService {
 
             System.out.println("Message Body: " + messageBody);
 
-            var messageResponse = Unirest.post(messageUrl)
+            var messageResponse = Unirest.post(webhookUrl)
                     .body(messageBody)
                     .asString();
 

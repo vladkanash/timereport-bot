@@ -6,7 +6,7 @@ public class WorklogContext {
 
     private List<UserWeekWorklog> userWorklogs;
     private List<String> weekDays;
-    private String currentMonth;
+    private List<MonthData> monthData;
 
     public List<UserWeekWorklog> getUserWorklogs() {
         return userWorklogs;
@@ -24,11 +24,11 @@ public class WorklogContext {
         this.weekDays = weekDays;
     }
 
-    public String getCurrentMonth() {
-        return currentMonth;
+    public List<MonthData> getMonthData() {
+        return monthData;
     }
 
-    public void setCurrentMonth(String currentMonth) {
-        this.currentMonth = currentMonth;
+    public void setMonthData(List<MonthData> monthData) {
+        this.monthData = monthData;
     }
 }

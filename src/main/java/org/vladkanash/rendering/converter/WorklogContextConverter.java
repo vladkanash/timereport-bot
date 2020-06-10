@@ -1,13 +1,15 @@
 package org.vladkanash.rendering.converter;
 
 import org.vladkanash.jira.entity.Worklog;
+import org.vladkanash.rendering.context.MonthData;
 import org.vladkanash.rendering.context.UserWeekWorklog;
 import org.vladkanash.rendering.context.WorklogContext;
 import org.vladkanash.util.TimeUtils;
 
-import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -22,12 +24,26 @@ public class WorklogContextConverter {
         var userWorklogs = getUserWorklogs(worklogs);
         weekWorklog.setWeekDays(getCurrentWeekDays());
         weekWorklog.setUserWorklogs(userWorklogs);
-        weekWorklog.setCurrentMonth(getCurrentMonth());
+        weekWorklog.setMonthData(getMonthData());
         return weekWorklog;
     }
 
-    private static String getCurrentMonth() {
-        return TimeUtils.getDisplayMonth(LocalDate.now());
+    private static List<MonthData> getMonthData() {
+        return IntStream.rangeClosed(1, DAYS_IN_WEEK)
+                .mapToObj(TimeUtils::getCurrentDayOfWeekDate)
+                .map(TimeUtils::getDisplayMonth)
+                .collect(Collectors.toMap(Function.identity(), m -> 1, Integer::sum, LinkedHashMap::new))
+                .entrySet()
+                .stream()
+                .map(WorklogContextConverter::createMonthData)
+                .collect(Collectors.toList());
+    }
+
+    private static MonthData createMonthData(Map.Entry<String, Integer> entry) {
+        var month = new MonthData();
+        month.setName(entry.getKey());
+        month.setDaysCount(entry.getValue());
+        return month;
     }
 
     private static List<String> getCurrentWeekDays() {

@@ -6,6 +6,7 @@ import org.vladkanash.jira.entity.Issue;
 import org.vladkanash.jira.entity.Worklog;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.vladkanash.util.TimeUtils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -14,23 +15,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.vladkanash.util.Config.CONFIG;
+
 public class JiraWorklogService {
 
     private static final String ISSUES = "issues";
     private static final Gson gson = new Gson();
 
     public static Stream<Worklog> getUserWorklogs(String jqlQuery) {
+        var users = CONFIG.getList("jira.users.list");
         return JiraRestApiService.searchQuery(jqlQuery)
                 .stream()
-                .flatMap(JiraWorklogService::parseResponse);
-    }
-
-    private static Stream<Worklog> getIssueWorklog(String issueCode) {
-        return JiraRestApiService.getWorklogsForIssue(issueCode)
-                .map(json -> gson.fromJson(json.toString(), Issue.Fields.Worklog.class))
-                .map(Issue.Fields.Worklog::getWorklogs)
-                .stream()
-                .flatMap(Collection::stream);
+                .flatMap(JiraWorklogService::parseResponse)
+                .filter(worklog -> isValidWorklog(worklog, users));
     }
 
     private static Stream<Worklog> parseResponse(JSONObject response) {
@@ -61,5 +58,20 @@ public class JiraWorklogService {
 
     private static boolean isDirectCallRequired(Issue issue) {
         return issue.getFields().getWorklog().getMaxResults() <= issue.getFields().getWorklog().getWorklogs().size();
+    }
+
+    private static Stream<Worklog> getIssueWorklog(String issueCode) {
+        return JiraRestApiService.getWorklogsForIssue(issueCode)
+                .map(json -> gson.fromJson(json.toString(), Issue.Fields.Worklog.class))
+                .map(Issue.Fields.Worklog::getWorklogs)
+                .stream()
+                .flatMap(Collection::stream);
+    }
+
+    private static boolean isValidWorklog(Worklog worklog, List<String> users) {
+        var isValidName = users.contains(worklog.getAuthor().getAccountId());
+        var submitDate = worklog.getSubmissionDate();
+
+        return TimeUtils.isInCurrentWeek(submitDate) && isValidName;
     }
 }
