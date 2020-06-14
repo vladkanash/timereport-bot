@@ -20,8 +20,12 @@ public class VelocityService {
     private static final String TEMPLATE_NAME = "reportTemplate.vm";
     private static final String CONTEXT = "context";
 
+    private final WorklogContextConverter contextConverter;
+
     @Inject
-    public VelocityService() {
+    public VelocityService(WorklogContextConverter contextConverter) {
+        this.contextConverter = contextConverter;
+
         Properties p = new Properties();
         p.setProperty("resource.loader", "class");
         p.setProperty("class.resource.loader.class",
@@ -46,7 +50,7 @@ public class VelocityService {
 
     private VelocityContext createContext(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
         VelocityContext context = new VelocityContext();
-        context.put(CONTEXT, WorklogContextConverter.convert(worklogs, startDate, endDate));
+        context.put(CONTEXT, contextConverter.convert(worklogs, startDate, endDate));
         return context;
     }
 }

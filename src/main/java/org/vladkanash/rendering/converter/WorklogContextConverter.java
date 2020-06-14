@@ -7,6 +7,7 @@ import org.vladkanash.rendering.context.UserWorklogData;
 import org.vladkanash.rendering.context.WorklogSummary;
 import org.vladkanash.util.TimeUtils;
 
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,9 +19,12 @@ import java.util.stream.Stream;
 
 public class WorklogContextConverter {
 
+    @Inject
+    public WorklogContextConverter() {}
+
     public static final String AVATAR_SIZE = "48x48";
 
-    public static WorklogSummary convert(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
+    public WorklogSummary convert(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
         var worklogList = worklogs.collect(Collectors.toList());
 
         var weekWorklog = new WorklogSummary();
@@ -31,30 +35,30 @@ public class WorklogContextConverter {
         return weekWorklog;
     }
 
-    private static List<MonthData> getMonthData(LocalDate startDate, LocalDate endDate) {
+    private List<MonthData> getMonthData(LocalDate startDate, LocalDate endDate) {
         return startDate.datesUntil(endDate.plusDays(1))
                 .map(TimeUtils::getDisplayMonth)
                 .collect(Collectors.toMap(Function.identity(), m -> 1, Integer::sum, LinkedHashMap::new))
                 .entrySet()
                 .stream()
-                .map(WorklogContextConverter::createMonthData)
+                .map(this::createMonthData)
                 .collect(Collectors.toList());
     }
 
-    private static MonthData createMonthData(Map.Entry<String, Integer> entry) {
+    private MonthData createMonthData(Map.Entry<String, Integer> entry) {
         var month = new MonthData();
         month.setName(entry.getKey());
         month.setDaysCount(entry.getValue());
         return month;
     }
 
-    private static List<String> getDayNames(LocalDate startDate, LocalDate endDate) {
+    private List<String> getDayNames(LocalDate startDate, LocalDate endDate) {
         return startDate.datesUntil(endDate.plusDays(1))
                 .map(TimeUtils::getDisplayDay)
                 .collect(Collectors.toList());
     }
 
-    private static List<UserWorklogData> getUserWorklogs(List<Worklog> worklogs, LocalDate startDate) {
+    private List<UserWorklogData> getUserWorklogs(List<Worklog> worklogs, LocalDate startDate) {
         return worklogs
                 .stream()
                 .collect(Collectors.groupingBy(w -> w.getAuthor().getAccountId()))
@@ -64,7 +68,7 @@ public class WorklogContextConverter {
                 .collect(Collectors.toList());
     }
 
-    private static UserWorklogData getUserWorklog(List<Worklog> userWorklogs, LocalDate startDate) {
+    private UserWorklogData getUserWorklog(List<Worklog> userWorklogs, LocalDate startDate) {
         var result = new UserWorklogData();
         var worklog = userWorklogs.get(0);
 
@@ -76,7 +80,7 @@ public class WorklogContextConverter {
         return result;
     }
 
-    private static Map<String, LoggedTimeData> getSubmittedTime(List<Worklog> userWorklogs, LocalDate startDate) {
+    private Map<String, LoggedTimeData> getSubmittedTime(List<Worklog> userWorklogs, LocalDate startDate) {
         var reportedTime = userWorklogs.stream()
                 .collect(Collectors.groupingBy(log -> log.getSubmissionDate().toLocalDate()));
 
@@ -85,7 +89,7 @@ public class WorklogContextConverter {
                         date -> getTotalTime(reportedTime.getOrDefault(date, Collections.emptyList()))));
     }
 
-    private static LoggedTimeData getTotalTime(List<Worklog> userWorklogs) {
+    private LoggedTimeData getTotalTime(List<Worklog> userWorklogs) {
         var totalSeconds = userWorklogs.stream()
                 .mapToInt(Worklog::getReportedSeconds)
                 .sum();
