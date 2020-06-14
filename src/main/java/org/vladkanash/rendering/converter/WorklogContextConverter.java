@@ -1,9 +1,10 @@
 package org.vladkanash.rendering.converter;
 
 import org.vladkanash.jira.entity.Worklog;
+import org.vladkanash.rendering.context.LoggedTimeData;
 import org.vladkanash.rendering.context.MonthData;
-import org.vladkanash.rendering.context.UserWeekWorklog;
-import org.vladkanash.rendering.context.WorklogContext;
+import org.vladkanash.rendering.context.UserWorklogData;
+import org.vladkanash.rendering.context.WorklogSummary;
 import org.vladkanash.util.TimeUtils;
 
 import java.time.LocalDate;
@@ -21,11 +22,11 @@ public class WorklogContextConverter {
     public static final String AVATAR_SIZE = "48x48";
     public static final int DAYS_IN_WEEK = 7;
 
-    public static WorklogContext convert(Stream<Worklog> worklogs) {
-        var weekWorklog = new WorklogContext();
+    public static WorklogSummary convert(Stream<Worklog> worklogs) {
+        var weekWorklog = new WorklogSummary();
         var userWorklogs = getUserWorklogs(worklogs);
-        weekWorklog.setWeekDays(getCurrentWeekDays());
-        weekWorklog.setUserWorklogs(userWorklogs);
+        weekWorklog.setDayNames(getCurrentWeekDays());
+        weekWorklog.setUserWorklogData(userWorklogs);
         weekWorklog.setMonthData(getMonthData());
         return weekWorklog;
     }
@@ -55,7 +56,7 @@ public class WorklogContextConverter {
                 .collect(Collectors.toList());
     }
 
-    private static List<UserWeekWorklog> getUserWorklogs(Stream<Worklog> worklogs) {
+    private static List<UserWorklogData> getUserWorklogs(Stream<Worklog> worklogs) {
         return worklogs
                 .collect(Collectors.groupingBy(w -> w.getAuthor().getAccountId()))
                 .values()
@@ -64,8 +65,8 @@ public class WorklogContextConverter {
                 .collect(Collectors.toList());
     }
 
-    private static UserWeekWorklog getUserWeekWorklog(List<Worklog> userWorklogs) {
-        var result = new UserWeekWorklog();
+    private static UserWorklogData getUserWeekWorklog(List<Worklog> userWorklogs) {
+        var result = new UserWorklogData();
         var worklog = userWorklogs.get(0);
 
         result.setUserId(worklog.getAuthor().getAccountId());
@@ -76,21 +77,29 @@ public class WorklogContextConverter {
         return result;
     }
 
-    private static Map<String, String> getReportedTime(List<Worklog> userWorklogs) {
+    private static Map<String, LoggedTimeData> getReportedTime(List<Worklog> userWorklogs) {
         var reportedTime = userWorklogs.stream()
                 .collect(Collectors.groupingBy(work ->
                         TimeUtils.toLocalDate(work.getSubmissionDate())));
 
         return TimeUtils.getCurrentDayOfWeekDate(1)
-                .datesUntil(LocalDate.now())
+                .datesUntil(LocalDate.now().plusDays(1))
                 .collect(Collectors.toMap(TimeUtils::getDisplayDay,
                         date -> getTotalTime(reportedTime.getOrDefault(date, Collections.emptyList()))));
     }
 
-    private static String getTotalTime(List<Worklog> userWorklogs) {
+    private static LoggedTimeData getTotalTime(List<Worklog> userWorklogs) {
         var totalSeconds = userWorklogs.stream()
                 .mapToInt(Worklog::getReportedSeconds)
                 .sum();
-        return String.valueOf(totalSeconds / 3600);
+
+        var totalMinutes = totalSeconds / 60;
+        var hoursPart = totalMinutes / 60;
+        var minutesPart = totalMinutes % 60;
+
+        var result = new LoggedTimeData();
+        result.setHours(String.valueOf(hoursPart));
+        result.setMinutes(minutesPart != 0 ? String.valueOf(minutesPart) : "");
+        return result;
     }
 }

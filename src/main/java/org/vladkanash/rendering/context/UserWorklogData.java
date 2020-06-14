@@ -3,13 +3,13 @@ package org.vladkanash.rendering.context;
 import java.util.Map;
 import java.util.Objects;
 
-public class UserWeekWorklog {
+public class UserWorklogData {
 
     private String name;
     private String userId;
     private String avatarUrl;
-    private String totalTime;
-    private Map<String, String> submittedTime;
+    private LoggedTimeData totalTime;
+    private Map<String, LoggedTimeData> submittedTime;
 
     public String getName() {
         return name;
@@ -35,19 +35,19 @@ public class UserWeekWorklog {
         this.avatarUrl = avatarUrl;
     }
 
-    public String getTotalTime() {
+    public LoggedTimeData getTotalTime() {
         return totalTime;
     }
 
-    public void setTotalTime(String totalTime) {
+    public void setTotalTime(LoggedTimeData totalTime) {
         this.totalTime = totalTime;
     }
 
-    public Map<String, String> getSubmittedTime() {
+    public Map<String, LoggedTimeData> getSubmittedTime() {
         return submittedTime;
     }
 
-    public void setSubmittedTime(Map<String, String> submittedTime) {
+    public void setSubmittedTime(Map<String, LoggedTimeData> submittedTime) {
         this.submittedTime = submittedTime;
     }
 
@@ -55,7 +55,7 @@ public class UserWeekWorklog {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserWeekWorklog that = (UserWeekWorklog) o;
+        UserWorklogData that = (UserWorklogData) o;
         return Objects.equals(name, that.name) &&
                 Objects.equals(userId, that.userId) &&
                 Objects.equals(avatarUrl, that.avatarUrl) &&

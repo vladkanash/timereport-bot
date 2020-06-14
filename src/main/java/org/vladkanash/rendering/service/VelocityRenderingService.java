@@ -27,6 +27,8 @@ public class VelocityRenderingService {
 
             template.merge(context, writer);
 
+            System.out.println(writer.toString());
+
             return Optional.of(writer.toString());
         } catch (ResourceNotFoundException | MethodInvocationException | ParseErrorException e) {
             e.printStackTrace();

@@ -6,10 +6,11 @@
         table {
             width: 100%;
             table-layout: fixed;
+            border-collapse: collapse;
         }
 
         table td {
-            border: 1px solid #404040;
+            border: 2px solid #404040;
             text-align: center;
             padding: 5px;
         }
@@ -42,6 +43,12 @@
 
         td.user-avatar {
             width: 50px;
+        }
+
+        div.submitted-minutes {
+            float:right;
+            padding: 5px 0;
+            font-size: 20px;
         }
 
         td.submitted-1,
@@ -91,23 +98,26 @@
         </td>
     </tr>
     <tr>
-        #foreach($day in ${context.weekDays})
+        #foreach($day in ${context.dayNames})
             <td class="week-day">$day</td>
         #end
     </tr>
     </thead>
     <tbody>
-        #foreach($user in ${context.userWorklogs})
+        #foreach($user in ${context.userWorklogData})
         <tr>
             <td class="user-avatar">
                 <img src="${user.avatarUrl}" alt="user avatar">
             </td>
             <td class="user-name" colspan="3">${user.name}</td>
-            #foreach($day in ${context.weekDays})
+            #foreach($day in ${context.dayNames})
                 #if(${user.submittedTime.get($day)})
-                    #set($submittedHours = ${user.submittedTime.get($day)})
-                    <td class="submitted-$submittedHours past">
-                        $submittedHours
+                    #set($submittedTime = ${user.submittedTime.get($day)})
+                    <td class="submitted-$submittedTime.hours past">
+                        $submittedTime.hours
+                        <div class="submitted-minutes">
+                            $submittedTime.minutes
+                        </div>
                     </td>
                 #else
                     <td class="submitted-0">
@@ -116,7 +126,7 @@
             #end
             <td class="total-hours">
                 #if($user.totalTime)
-                    ${user.totalTime}h
+                    ${user.totalTime.hours}h
                 #else
                     ${zeroHours}h
                 #end
