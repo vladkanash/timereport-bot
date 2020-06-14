@@ -50,8 +50,9 @@ public class SlackService {
     }
 
     private static String getAttachmentLink(String publicLink) {
-        return publicLink.replaceFirst("https://slack-files.com/(.*?)-(.*?)-(.*?)",
-                "https://slack-files.com/files-pri/$1-$2/time-report.png?pub_secret=$3");
+        var regex = CONFIG.get("slack.image.publicUrl.regex");
+        var templateUrl = CONFIG.get("slack.image.publicUrl.template");
+        return publicLink.replaceFirst(regex, templateUrl);
     }
 
     private static HttpResponse<JsonNode> shareImage(String token, String fileId)
