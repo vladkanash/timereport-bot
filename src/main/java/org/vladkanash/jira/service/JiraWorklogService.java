@@ -1,44 +1,62 @@
 package org.vladkanash.jira.service;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import org.vladkanash.jira.entity.Issue;
 import org.vladkanash.jira.entity.Worklog;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.vladkanash.jira.util.RequestUtils;
+import org.vladkanash.jira.entity.WorklogSearchResponse;
+import org.vladkanash.util.Config;
 import org.vladkanash.util.TimeUtils;
 
-import java.lang.reflect.Type;
+import javax.inject.Inject;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.vladkanash.util.Config.CONFIG;
-
 public class JiraWorklogService {
 
-    private static final String ISSUES = "issues";
-    private static final Gson gson = new Gson();
+    private final JiraRestApiService restApiService;
+    private final Config config;
+    private final Gson gson;
 
-    public static Stream<Worklog> getUserWorklogs(List<String> userIds, LocalDate startDate, LocalDate endDate) {
-        var jqlQuery = RequestUtils.getWorklogSearchQuery(userIds, startDate, endDate);
+    @Inject
+    public JiraWorklogService(JiraRestApiService restApiService, Config config) {
+        this.restApiService = restApiService;
+        this.config = config;
+        this.gson = new Gson();
+    }
 
-        var users = CONFIG.getList("jira.users.list");
-        return JiraRestApiService.searchQuery(jqlQuery)
+    public Stream<Worklog> getUserWorklogs(List<String> userIds, LocalDate startDate, LocalDate endDate) {
+        var jqlQuery = getWorklogSearchQuery(userIds, startDate, endDate);
+
+        var users = config.getList("jira.users.list");
+        return restApiService.searchQuery(jqlQuery)
                 .stream()
-                .flatMap(JiraWorklogService::parseResponse)
+                .flatMap(this::parseResponse)
                 .filter(worklog -> isValidWorklog(worklog, users, startDate, endDate));
     }
 
-    private static Stream<Worklog> parseResponse(JSONObject response) {
-        var issuesArray = response.getJSONArray(ISSUES);
-        var partitionedIssues = parseIssues(issuesArray)
+    private String getWorklogSearchQuery(List<String> userIds, LocalDate startDate, LocalDate endDate) {
+        var rawQuery = config.get("jira.rest.worklog.query");
+
+        var isoStartDate = startDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        var isoEndDate = endDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
+
+        var escapedUsers = userIds
                 .stream()
-                .collect(Collectors.partitioningBy(JiraWorklogService::isDirectCallRequired));
+                .map(user -> "'" + user + "'")
+                .collect(Collectors.joining(", "));
+
+        return String.format(rawQuery, escapedUsers, isoStartDate, isoEndDate);
+    }
+
+    private Stream<Worklog> parseResponse(String response) {
+        var partitionedIssues = parseIssues(response)
+                .getIssues()
+                .stream()
+                .collect(Collectors.partitioningBy(this::isDirectCallRequired));
 
         var worklogs = partitionedIssues.get(Boolean.FALSE)
                 .stream()
@@ -49,31 +67,30 @@ public class JiraWorklogService {
         var directCallWorklogs = partitionedIssues.get(Boolean.TRUE)
                 .stream()
                 .map(Issue::getCode)
-                .flatMap(JiraWorklogService::getIssueWorklog);
+                .flatMap(this::getIssueWorklog);
 
         return Stream.concat(worklogs, directCallWorklogs);
     }
 
-    private static List<Issue> parseIssues(JSONArray issuesArray) {
-        Type issuesList = new TypeToken<ArrayList<Issue>>() {
-        }.getType();
-        return gson.fromJson(issuesArray.toString(), issuesList);
+    private WorklogSearchResponse parseIssues(String searchResponse) {
+        return gson.fromJson(searchResponse, WorklogSearchResponse.class);
     }
 
-    private static boolean isDirectCallRequired(Issue issue) {
-        return issue.getFields().getWorklog().getMaxResults() <= issue.getFields().getWorklog().getWorklogs().size();
+    private boolean isDirectCallRequired(Issue issue) {
+        return issue.getFields().getWorklog().getMaxResults() <=
+                issue.getFields().getWorklog().getWorklogs().size();
     }
 
-    private static Stream<Worklog> getIssueWorklog(String issueCode) {
-        return JiraRestApiService.getWorklogsForIssue(issueCode)
-                .map(json -> gson.fromJson(json.toString(), Issue.Fields.Worklog.class))
+    private Stream<Worklog> getIssueWorklog(String issueCode) {
+        return restApiService.getWorklogsForIssue(issueCode)
+                .map(json -> gson.fromJson(json, Issue.Fields.Worklog.class))
                 .map(Issue.Fields.Worklog::getWorklogs)
                 .stream()
                 .flatMap(Collection::stream);
     }
 
-    private static boolean isValidWorklog(Worklog worklog, List<String> users,
-                                          LocalDate startDate, LocalDate endDate) {
+    private boolean isValidWorklog(Worklog worklog, List<String> users,
+                                   LocalDate startDate, LocalDate endDate) {
 
         var isValidName = users.contains(worklog.getAuthor().getAccountId());
         var submitDate = worklog.getSubmissionDate();

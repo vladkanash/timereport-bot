@@ -4,28 +4,30 @@ import com.slack.api.Slack;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.files.FilesSharedPublicURLRequest;
 import com.slack.api.methods.request.files.FilesUploadRequest;
+import org.vladkanash.util.Config;
 
 import javax.imageio.ImageIO;
+import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.vladkanash.util.Config.CONFIG;
-
 public class SlackService {
 
-    public static void sendReport(BufferedImage image) {
-        var webhookUrl = CONFIG.get("slack.url.webhook");
-        var report = generateReport(image);
+    private final Config config;
 
-        try {
-            postMessage(webhookUrl, report);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Inject
+    public SlackService(Config config) {
+        this.config = config;
     }
 
-    public static String generateReport(BufferedImage image) {
+    public void sendReport(BufferedImage image) {
+        var webhookUrl = config.get("slack.url.webhook");
+        var report = generateReport(image);
+        postMessage(webhookUrl, report);
+    }
+
+    public String generateReport(BufferedImage image) {
         try {
             var fileId = uploadImage(image);
             var publicLink = shareImage(fileId);
@@ -37,7 +39,15 @@ public class SlackService {
         }
     }
 
-    private static String uploadImage(BufferedImage image)
+    public void postMessage(String webhookUrl, String messageBody) {
+        try {
+            Slack.getInstance().send(webhookUrl, messageBody);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String uploadImage(BufferedImage image)
             throws IOException, SlackApiException {
 
         var imageBytes = getBytesForImage(image);
@@ -45,19 +55,19 @@ public class SlackService {
         var request = FilesUploadRequest.builder()
                 .fileData(imageBytes)
                 .filename("time-report.png")
-                .initialComment(CONFIG.get("slack.image.comment"))
-                .token(CONFIG.get("slack.auth.token"))
+                .initialComment(config.get("slack.image.comment"))
+                .token(config.get("slack.auth.token"))
                 .build();
 
         return Slack.getInstance().methods().filesUpload(request).getFile().getId();
     }
 
-    private static String shareImage(String fileId)
+    private String shareImage(String fileId)
             throws IOException, SlackApiException {
 
         var request = FilesSharedPublicURLRequest.builder()
                 .file(fileId)
-                .token(CONFIG.get("slack.auth.token"))
+                .token(config.get("slack.auth.token"))
                 .build();
 
         return Slack.getInstance().methods().filesSharedPublicURL(request)
@@ -65,12 +75,7 @@ public class SlackService {
                 .getPermalinkPublic();
     }
 
-    public static void postMessage(String webhookUrl, String messageBody)
-            throws IOException {
-        Slack.getInstance().send(webhookUrl, messageBody);
-    }
-
-    private static byte[] getBytesForImage(BufferedImage pngImage) {
+    private byte[] getBytesForImage(BufferedImage pngImage) {
         try {
             var outputStream = new ByteArrayOutputStream();
             ImageIO.write(pngImage, "png", outputStream);
@@ -81,16 +86,16 @@ public class SlackService {
         return null;
     }
 
-    private static String getMessageBody(String publicLink) {
-        var messagePayload = CONFIG.get("slack.message.payload");
-        var channelId = CONFIG.get("slack.channel.id");
+    private String getMessageBody(String publicLink) {
+        var messagePayload = config.get("slack.message.payload");
+        var channelId = config.get("slack.channel.id");
         var attachmentLink = getAttachmentLink(publicLink);
         return String.format(messagePayload, channelId, attachmentLink);
     }
 
-    private static String getAttachmentLink(String publicLink) {
-        var regex = CONFIG.get("slack.image.publicUrl.regex");
-        var templateUrl = CONFIG.get("slack.image.publicUrl.template");
+    private String getAttachmentLink(String publicLink) {
+        var regex = config.get("slack.image.publicUrl.regex");
+        var templateUrl = config.get("slack.image.publicUrl.template");
         return publicLink.replaceFirst(regex, templateUrl);
     }
 }

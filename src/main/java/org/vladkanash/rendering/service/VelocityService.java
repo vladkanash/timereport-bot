@@ -8,27 +8,34 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.vladkanash.jira.entity.Worklog;
 import org.vladkanash.rendering.converter.WorklogContextConverter;
 
+import javax.inject.Inject;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
-public class VelocityRenderingService {
+public class VelocityService {
 
-    public static final String TEMPLATE_NAME = "reportTemplate.vm";
+    private static final String TEMPLATE_NAME = "reportTemplate.vm";
+    private static final String CONTEXT = "context";
 
-    public static Optional<String> renderHtml(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
-        initVelocity();
+    @Inject
+    public VelocityService() {
+        Properties p = new Properties();
+        p.setProperty("resource.loader", "class");
+        p.setProperty("class.resource.loader.class",
+                "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+        Velocity.init(p);
+    }
 
+    public Optional<String> renderHtml(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
         try {
             var template = Velocity.getTemplate(TEMPLATE_NAME);
             var writer = new StringWriter();
             var context = createContext(worklogs, startDate, endDate);
 
             template.merge(context, writer);
-
-            System.out.println(writer.toString());
 
             return Optional.of(writer.toString());
         } catch (ResourceNotFoundException | MethodInvocationException | ParseErrorException e) {
@@ -37,17 +44,9 @@ public class VelocityRenderingService {
         }
     }
 
-    private static VelocityContext createContext(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
+    private VelocityContext createContext(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
         VelocityContext context = new VelocityContext();
-        context.put("context", WorklogContextConverter.convert(worklogs, startDate, endDate));
+        context.put(CONTEXT, WorklogContextConverter.convert(worklogs, startDate, endDate));
         return context;
-    }
-
-    private static void initVelocity() {
-        Properties p = new Properties();
-        p.setProperty("resource.loader", "class");
-        p.setProperty("class.resource.loader.class",
-                "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-        Velocity.init(p);
     }
 }

@@ -1,19 +1,20 @@
 package org.vladkanash.util;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
-public enum Config {
-    CONFIG;
+public class Config {
 
     private static final String LIST_DELIMITER = ",";
     private static final String PATH = "config.properties";
 
     private final Properties properties = new Properties();
 
-    Config() {
+    @Inject
+    public Config() {
         try (var inputStream = Config.class.getClassLoader().getResourceAsStream(PATH)) {
             properties.load(Objects.requireNonNull(inputStream));
         } catch (Exception e) {
