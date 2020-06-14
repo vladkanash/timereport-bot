@@ -14,26 +14,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class WorklogContextConverter {
 
     public static final String AVATAR_SIZE = "48x48";
-    public static final int DAYS_IN_WEEK = 7;
 
-    public static WorklogSummary convert(Stream<Worklog> worklogs) {
+    public static WorklogSummary convert(Stream<Worklog> worklogs, LocalDate startDate, LocalDate endDate) {
+        var worklogList = worklogs.collect(Collectors.toList());
+
         var weekWorklog = new WorklogSummary();
-        var userWorklogs = getUserWorklogs(worklogs);
-        weekWorklog.setDayNames(getCurrentWeekDays());
+        var userWorklogs = getUserWorklogs(worklogList, startDate);
+        weekWorklog.setDayNames(getDayNames(startDate, endDate));
         weekWorklog.setUserWorklogData(userWorklogs);
-        weekWorklog.setMonthData(getMonthData());
+        weekWorklog.setMonthData(getMonthData(startDate, endDate));
         return weekWorklog;
     }
 
-    private static List<MonthData> getMonthData() {
-        return IntStream.rangeClosed(1, DAYS_IN_WEEK)
-                .mapToObj(TimeUtils::getCurrentDayOfWeekDate)
+    private static List<MonthData> getMonthData(LocalDate startDate, LocalDate endDate) {
+        return startDate.datesUntil(endDate.plusDays(1))
                 .map(TimeUtils::getDisplayMonth)
                 .collect(Collectors.toMap(Function.identity(), m -> 1, Integer::sum, LinkedHashMap::new))
                 .entrySet()
@@ -49,41 +48,40 @@ public class WorklogContextConverter {
         return month;
     }
 
-    private static List<String> getCurrentWeekDays() {
-        return IntStream.rangeClosed(1, DAYS_IN_WEEK)
-                .mapToObj(TimeUtils::getCurrentDayOfWeekDate)
+    private static List<String> getDayNames(LocalDate startDate, LocalDate endDate) {
+        return startDate.datesUntil(endDate.plusDays(1))
                 .map(TimeUtils::getDisplayDay)
                 .collect(Collectors.toList());
     }
 
-    private static List<UserWorklogData> getUserWorklogs(Stream<Worklog> worklogs) {
+    private static List<UserWorklogData> getUserWorklogs(List<Worklog> worklogs, LocalDate startDate) {
         return worklogs
+                .stream()
                 .collect(Collectors.groupingBy(w -> w.getAuthor().getAccountId()))
                 .values()
                 .stream()
-                .map(WorklogContextConverter::getUserWeekWorklog)
+                .map(UserWs -> getUserWorklog(UserWs, startDate))
                 .collect(Collectors.toList());
     }
 
-    private static UserWorklogData getUserWeekWorklog(List<Worklog> userWorklogs) {
+    private static UserWorklogData getUserWorklog(List<Worklog> userWorklogs, LocalDate startDate) {
         var result = new UserWorklogData();
         var worklog = userWorklogs.get(0);
 
         result.setUserId(worklog.getAuthor().getAccountId());
         result.setName(worklog.getAuthor().getDisplayName());
         result.setAvatarUrl(worklog.getAuthor().getAvatarUrls().getOrDefault(AVATAR_SIZE, ""));
-        result.setSubmittedTime(getReportedTime(userWorklogs));
+        result.setSubmittedTime(getSubmittedTime(userWorklogs, startDate));
         result.setTotalTime(getTotalTime(userWorklogs));
         return result;
     }
 
-    private static Map<String, LoggedTimeData> getReportedTime(List<Worklog> userWorklogs) {
+    private static Map<String, LoggedTimeData> getSubmittedTime(List<Worklog> userWorklogs, LocalDate startDate) {
         var reportedTime = userWorklogs.stream()
                 .collect(Collectors.groupingBy(work ->
                         TimeUtils.toLocalDate(work.getSubmissionDate())));
 
-        return TimeUtils.getCurrentDayOfWeekDate(1)
-                .datesUntil(LocalDate.now().plusDays(1))
+        return startDate.datesUntil(LocalDate.now().plusDays(1))
                 .collect(Collectors.toMap(TimeUtils::getDisplayDay,
                         date -> getTotalTime(reportedTime.getOrDefault(date, Collections.emptyList()))));
     }

@@ -1,13 +1,12 @@
 package org.vladkanash.slack.service;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import com.slack.api.Slack;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.request.files.FilesSharedPublicURLRequest;
+import com.slack.api.methods.request.files.FilesUploadRequest;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -15,37 +14,77 @@ import static org.vladkanash.util.Config.CONFIG;
 
 public class SlackService {
 
-    public static void uploadImage(BufferedImage image) {
-        var token = CONFIG.get("slack.auth.token");
+    public static void sendReport(BufferedImage image) {
         var webhookUrl = CONFIG.get("slack.url.webhook");
-
-        var inputStream = getStreamForImage(image);
+        var report = generateReport(image);
 
         try {
-            var uploadResponse = uploadImage(token, inputStream);
-            var fileId = getFileId(uploadResponse, "id");
-            var shareResponse = shareImage(token, fileId);
-            var publicLink = getFileId(shareResponse, "permalink_public");
-            var attachmentLink = getAttachmentLink(publicLink);
-            var messageBody = getMessageBody(attachmentLink);
-            var messageResponse = postMessage(webhookUrl, messageBody);
-
-            System.out.println(messageResponse.getStatusText());
-
-        } catch (UnirestException e) {
+            postMessage(webhookUrl, report);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static HttpResponse<String> postMessage(String webhookUrl, String messageBody) throws UnirestException {
-        return Unirest.post(webhookUrl)
-                .body(messageBody)
-                .asString();
+    public static String generateReport(BufferedImage image) {
+        try {
+            var fileId = uploadImage(image);
+            var publicLink = shareImage(fileId);
+            return getMessageBody(publicLink);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    private static String getMessageBody(String attachmentLink) {
+    private static String uploadImage(BufferedImage image)
+            throws IOException, SlackApiException {
+
+        var imageBytes = getBytesForImage(image);
+
+        var request = FilesUploadRequest.builder()
+                .fileData(imageBytes)
+                .filename("time-report.png")
+                .initialComment(CONFIG.get("slack.image.comment"))
+                .token(CONFIG.get("slack.auth.token"))
+                .build();
+
+        return Slack.getInstance().methods().filesUpload(request).getFile().getId();
+    }
+
+    private static String shareImage(String fileId)
+            throws IOException, SlackApiException {
+
+        var request = FilesSharedPublicURLRequest.builder()
+                .file(fileId)
+                .token(CONFIG.get("slack.auth.token"))
+                .build();
+
+        return Slack.getInstance().methods().filesSharedPublicURL(request)
+                .getFile()
+                .getPermalinkPublic();
+    }
+
+    public static void postMessage(String webhookUrl, String messageBody)
+            throws IOException {
+        Slack.getInstance().send(webhookUrl, messageBody);
+    }
+
+    private static byte[] getBytesForImage(BufferedImage pngImage) {
+        try {
+            var outputStream = new ByteArrayOutputStream();
+            ImageIO.write(pngImage, "png", outputStream);
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static String getMessageBody(String publicLink) {
         var messagePayload = CONFIG.get("slack.message.payload");
         var channelId = CONFIG.get("slack.channel.id");
+        var attachmentLink = getAttachmentLink(publicLink);
         return String.format(messagePayload, channelId, attachmentLink);
     }
 
@@ -53,44 +92,5 @@ public class SlackService {
         var regex = CONFIG.get("slack.image.publicUrl.regex");
         var templateUrl = CONFIG.get("slack.image.publicUrl.template");
         return publicLink.replaceFirst(regex, templateUrl);
-    }
-
-    private static HttpResponse<JsonNode> shareImage(String token, String fileId)
-            throws UnirestException {
-        var url = CONFIG.get("slack.url.file.share");
-
-        return Unirest.post(url)
-                .header("Authorization", "Bearer " + token)
-                .field("file", fileId)
-                .asJson();
-    }
-
-    private static HttpResponse<JsonNode> uploadImage(String token, ByteArrayInputStream inputStream)
-            throws UnirestException {
-        var url = CONFIG.get("slack.url.file.upload");
-
-        return Unirest.post(url)
-                .header("Authorization", "Bearer " + token)
-                .field("file", inputStream, "time-report.png")
-                .field("initial_comment", CONFIG.get("slack.image.comment"))
-                .asJson();
-    }
-
-    private static String getFileId(HttpResponse<JsonNode> response, String id) {
-        return response.getBody()
-                .getObject()
-                .getJSONObject("file")
-                .getString(id);
-    }
-
-    private static ByteArrayInputStream getStreamForImage(BufferedImage pngImage) {
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            ImageIO.write(pngImage, "png", os);
-            return new ByteArrayInputStream(os.toByteArray());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

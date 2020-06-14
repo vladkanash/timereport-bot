@@ -2,6 +2,7 @@ package org.vladkanash.util;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalField;
@@ -9,21 +10,6 @@ import java.time.temporal.WeekFields;
 import java.util.Date;
 
 public class TimeUtils {
-
-    public static boolean isInCurrentWeek(Date date) {
-        var isAfterWeekStart = date.after(TimeUtils.toDate(TimeUtils.getCurrentDayOfWeekDate(1)));
-        var isBeforeWeekEnd = date.before(TimeUtils.toDate(TimeUtils.getCurrentDayOfWeekDate(7)));
-
-        return isAfterWeekStart && isBeforeWeekEnd;
-    }
-
-    public static String getFirstDayOfCurrentWeek() {
-        return getCurrentDayOfWeekDate(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
-    }
-
-    public static String getLastDayOfCurrentWeek() {
-        return getCurrentDayOfWeekDate(7).format(DateTimeFormatter.ISO_LOCAL_DATE);
-    }
 
     public static String getDisplayDay(LocalDate date) {
         return date.format(DateTimeFormatter.ofPattern("EEE, dd"));
@@ -43,9 +29,7 @@ public class TimeUtils {
         return LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 
-    private static Date toDate(LocalDate date) {
-        return Date.from(date.atStartOfDay()
-                .atZone(ZoneId.systemDefault())
-                .toInstant());
+    public static LocalDateTime toLocalDateTime(Date date) {
+        return LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
     }
 }

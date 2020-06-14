@@ -6,9 +6,11 @@ import org.vladkanash.jira.entity.Issue;
 import org.vladkanash.jira.entity.Worklog;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.vladkanash.jira.util.RequestUtils;
 import org.vladkanash.util.TimeUtils;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,12 +24,14 @@ public class JiraWorklogService {
     private static final String ISSUES = "issues";
     private static final Gson gson = new Gson();
 
-    public static Stream<Worklog> getUserWorklogs(String jqlQuery) {
+    public static Stream<Worklog> getUserWorklogs(List<String> userIds, LocalDate startDate, LocalDate endDate) {
+        var jqlQuery = RequestUtils.getWorklogSearchQuery(userIds, startDate, endDate);
+
         var users = CONFIG.getList("jira.users.list");
         return JiraRestApiService.searchQuery(jqlQuery)
                 .stream()
                 .flatMap(JiraWorklogService::parseResponse)
-                .filter(worklog -> isValidWorklog(worklog, users));
+                .filter(worklog -> isValidWorklog(worklog, users, startDate, endDate));
     }
 
     private static Stream<Worklog> parseResponse(JSONObject response) {
@@ -68,10 +72,16 @@ public class JiraWorklogService {
                 .flatMap(Collection::stream);
     }
 
-    private static boolean isValidWorklog(Worklog worklog, List<String> users) {
+    private static boolean isValidWorklog(Worklog worklog, List<String> users,
+                                          LocalDate startDate, LocalDate endDate) {
+
         var isValidName = users.contains(worklog.getAuthor().getAccountId());
         var submitDate = worklog.getSubmissionDate();
 
-        return TimeUtils.isInCurrentWeek(submitDate) && isValidName;
+        var localDate = TimeUtils.toLocalDateTime(submitDate);
+
+        return localDate.isBefore(endDate.plusDays(1).atStartOfDay())
+                && localDate.isAfter(startDate.atStartOfDay())
+                && isValidName;
     }
 }

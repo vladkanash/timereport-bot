@@ -57,14 +57,24 @@
         td.submitted-4,
         td.submitted-5,
         td.submitted-6,
-        td.submitted-7{
+        td.submitted-7 {
             font-size: 28px;
             background-color: #ffe952;
         }
 
         td.submitted-8 {
             font-size: 28px;
-            background-color: #00ff7f;
+            background-color: #3fff99;
+        }
+
+        td.submitted-9,
+        td.submitted-10,
+        td.submitted-11,
+        td.submitted-12,
+        td.submitted-13,
+        td.submitted-14 {
+            font-size: 28px;
+            background-color: #008942;
         }
 
         td.total-hours {
