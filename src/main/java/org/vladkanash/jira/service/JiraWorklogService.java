@@ -1,14 +1,16 @@
 package org.vladkanash.jira.service;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.vladkanash.gson.adapter.LocalDateTimeAdapter;
 import org.vladkanash.jira.entity.Issue;
 import org.vladkanash.jira.entity.Worklog;
 import org.vladkanash.jira.entity.WorklogSearchResponse;
 import org.vladkanash.util.Config;
-import org.vladkanash.util.TimeUtils;
 
 import javax.inject.Inject;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +27,9 @@ public class JiraWorklogService {
     public JiraWorklogService(JiraRestApiService restApiService, Config config) {
         this.restApiService = restApiService;
         this.config = config;
-        this.gson = new Gson();
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
     }
 
     public Stream<Worklog> getUserWorklogs(List<String> userIds, LocalDate startDate, LocalDate endDate) {
@@ -95,10 +99,8 @@ public class JiraWorklogService {
         var isValidName = users.contains(worklog.getAuthor().getAccountId());
         var submitDate = worklog.getSubmissionDate();
 
-        var localDate = TimeUtils.toLocalDateTime(submitDate);
-
-        return localDate.isBefore(endDate.plusDays(1).atStartOfDay())
-                && localDate.isAfter(startDate.atStartOfDay())
+        return submitDate.isBefore(endDate.plusDays(1).atStartOfDay())
+                && submitDate.isAfter(startDate.atStartOfDay())
                 && isValidName;
     }
 }

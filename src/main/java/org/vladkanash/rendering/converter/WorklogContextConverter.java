@@ -78,8 +78,7 @@ public class WorklogContextConverter {
 
     private static Map<String, LoggedTimeData> getSubmittedTime(List<Worklog> userWorklogs, LocalDate startDate) {
         var reportedTime = userWorklogs.stream()
-                .collect(Collectors.groupingBy(work ->
-                        TimeUtils.toLocalDate(work.getSubmissionDate())));
+                .collect(Collectors.groupingBy(log -> log.getSubmissionDate().toLocalDate()));
 
         return startDate.datesUntil(LocalDate.now().plusDays(1))
                 .collect(Collectors.toMap(TimeUtils::getDisplayDay,

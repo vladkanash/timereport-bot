@@ -31,6 +31,7 @@ public class Issue {
 
         private Worklog worklog;
 
+
         public Worklog getWorklog() {
             return worklog;
         }

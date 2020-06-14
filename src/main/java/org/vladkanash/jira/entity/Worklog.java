@@ -2,13 +2,13 @@ package org.vladkanash.jira.entity;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class Worklog {
 
     @SerializedName("started")
-    private Date submissionDate;
+    private LocalDateTime submissionDate;
 
     @SerializedName("timeSpentSeconds")
     private Integer reportedSeconds;
@@ -56,11 +56,11 @@ public class Worklog {
         }
     }
 
-    public Date getSubmissionDate() {
+    public LocalDateTime getSubmissionDate() {
         return submissionDate;
     }
 
-    public void setSubmissionDate(Date submissionDate) {
+    public void setSubmissionDate(LocalDateTime submissionDate) {
         this.submissionDate = submissionDate;
     }
 
