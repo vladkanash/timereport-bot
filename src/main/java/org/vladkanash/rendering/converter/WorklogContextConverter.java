@@ -8,6 +8,7 @@ import org.vladkanash.rendering.context.WorklogSummary;
 import org.vladkanash.util.TimeUtils;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -17,6 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Singleton
 public class WorklogContextConverter {
 
     @Inject

@@ -9,12 +9,14 @@ import org.vladkanash.jira.entity.Worklog;
 import org.vladkanash.rendering.converter.WorklogContextConverter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.StringWriter;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Stream;
 
+@Singleton
 public class VelocityService {
 
     private static final String TEMPLATE_NAME = "reportTemplate.vm";

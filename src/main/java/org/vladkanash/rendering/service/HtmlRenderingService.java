@@ -3,9 +3,11 @@ package org.vladkanash.rendering.service;
 import gui.ava.html.Html2Image;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
 
+@Singleton
 public class HtmlRenderingService {
 
     @Inject

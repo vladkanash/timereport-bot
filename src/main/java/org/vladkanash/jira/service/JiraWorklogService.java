@@ -9,6 +9,7 @@ import org.vladkanash.jira.entity.WorklogSearchResponse;
 import org.vladkanash.util.Config;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Singleton
 public class JiraWorklogService {
 
     private final JiraRestApiService restApiService;

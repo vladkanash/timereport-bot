@@ -3,6 +3,7 @@ package org.vladkanash.jira.service;
 import org.vladkanash.util.Config;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,6 +14,7 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.Optional;
 
+@Singleton
 public class JiraRestApiService {
 
     private final Config config;

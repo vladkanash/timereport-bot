@@ -1,21 +1,22 @@
 package org.vladkanash.util;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 
+@Singleton
 public class Config {
 
-    private static final String LIST_DELIMITER = ",";
-    private static final String PATH = "config.properties";
+    private final static String LIST_DELIMITER = ",";
 
     private final Properties properties = new Properties();
 
     @Inject
-    public Config() {
-        try (var inputStream = Config.class.getClassLoader().getResourceAsStream(PATH)) {
+    public Config(String configPath) {
+        try (var inputStream = Config.class.getClassLoader().getResourceAsStream(configPath)) {
             properties.load(Objects.requireNonNull(inputStream));
         } catch (Exception e) {
             e.printStackTrace();
