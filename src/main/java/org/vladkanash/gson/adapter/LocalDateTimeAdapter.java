@@ -13,12 +13,13 @@ public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
 
     private final DateTimeFormatter isoFormatter = new DateTimeFormatterBuilder()
             .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            .optionalStart().appendOffset("+HHMM", "+0000").optionalEnd()
+            .optionalStart().appendOffset("+HHMM", "+0000")
+            .optionalEnd()
             .toFormatter();
 
     @Override
     public void write(final JsonWriter jsonWriter, final LocalDateTime localDate) throws IOException {
-        jsonWriter.value(localDate.toString());
+        jsonWriter.value(localDate.format(isoFormatter));
     }
 
     @Override
