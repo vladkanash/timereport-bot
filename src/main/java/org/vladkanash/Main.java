@@ -12,22 +12,15 @@ public class Main {
     private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     public static void main(String[] args) {
-        var startDate = TimeUtils.getCurrentDayOfWeekDate(1);
-        var endDate = TimeUtils.getCurrentDayOfWeekDate(7);
-
-        var worklogService = context.getWorkLogService();
-        var velocityService = context.getVelocityService();
-        var imageService = context.getHtmlRenderingService();
         var slackService = context.getSlackService();
+        var timeReportFacade = context.getTimeReportFacade();
         var config = context.getConfig();
 
         var userIds = config.getList("jira.users.list");
+        var startDate = TimeUtils.getCurrentDayOfWeekDate(1);
+        var endDate = TimeUtils.getCurrentDayOfWeekDate(7);
 
-        var worklogs = worklogService.getUserWorklogs(userIds, startDate, endDate)
-                .peek(System.out::println);
-
-        velocityService.renderHtml(worklogs, startDate, endDate)
-                .flatMap(imageService::renderImage)
+        timeReportFacade.getReport(userIds, startDate, endDate)
                 .ifPresent(image -> {
                     var webhookUrl = config.get("slack.url.webhook");
                     var report = slackService.generateReport(image);

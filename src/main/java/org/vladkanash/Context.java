@@ -1,23 +1,18 @@
 package org.vladkanash;
 
 import dagger.Component;
-import org.vladkanash.jira.service.JiraWorklogService;
-import org.vladkanash.rendering.service.HtmlRenderingService;
-import org.vladkanash.rendering.service.VelocityService;
+import org.vladkanash.slack.facade.ReportGenerationFacade;
 import org.vladkanash.slack.service.SlackService;
 import org.vladkanash.util.Config;
+import org.vladkanash.util.UtilModule;
 
 import javax.inject.Singleton;
 
-@Component
+@Component(modules = {UtilModule.class})
 @Singleton
 public interface Context {
 
-    JiraWorklogService getWorkLogService();
-
-    VelocityService getVelocityService();
-
-    HtmlRenderingService getHtmlRenderingService();
+    ReportGenerationFacade getTimeReportFacade();
 
     SlackService getSlackService();
 
