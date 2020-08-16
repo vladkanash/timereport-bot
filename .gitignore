@@ -1,4 +1,3 @@
-**/resources/*.properties
 .idea/
 build/
 .gradle/
