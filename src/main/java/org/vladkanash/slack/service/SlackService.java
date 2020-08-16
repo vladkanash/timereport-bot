@@ -14,6 +14,8 @@ import java.io.IOException;
 
 public class SlackService {
 
+    public static final String IMAGE_NAME = "time-report.png";
+
     private final Config config;
 
     @Inject
@@ -23,11 +25,11 @@ public class SlackService {
 
     public void sendReport(BufferedImage image) {
         var webhookUrl = config.get("slack.url.webhook");
-        var report = generateReport(image);
+        var report = generateReportMessage(image);
         postMessage(webhookUrl, report);
     }
 
-    public String generateReport(BufferedImage image) {
+    public String generateReportMessage(BufferedImage image) {
         try {
             var fileId = uploadImage(image);
             var publicLink = shareImage(fileId);
@@ -39,9 +41,9 @@ public class SlackService {
         }
     }
 
-    public void postMessage(String webhookUrl, String messageBody) {
+    public void postMessage(String url, String messageBody) {
         try {
-            Slack.getInstance().send(webhookUrl, messageBody);
+            Slack.getInstance().send(url, messageBody);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -54,7 +56,7 @@ public class SlackService {
 
         var request = FilesUploadRequest.builder()
                 .fileData(imageBytes)
-                .filename("time-report.png")
+                .filename(IMAGE_NAME)
                 .initialComment(config.get("slack.image.comment"))
                 .token(config.get("slack.auth.token"))
                 .build();

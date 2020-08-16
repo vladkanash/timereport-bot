@@ -13,7 +13,8 @@ public class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
 
     private final DateTimeFormatter isoFormatter = new DateTimeFormatterBuilder()
             .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-            .optionalStart().appendOffset("+HHMM", "+0000")
+            .optionalStart()
+            .appendOffset("+HHMM", "+0000")
             .optionalEnd()
             .toFormatter();
 

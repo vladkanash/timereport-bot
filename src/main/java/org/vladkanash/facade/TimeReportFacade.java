@@ -1,4 +1,4 @@
-package org.vladkanash.slack.facade;
+package org.vladkanash.facade;
 
 import org.vladkanash.jira.service.JiraWorklogService;
 import org.vladkanash.rendering.service.HtmlRenderingService;
@@ -12,16 +12,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Singleton
-public class ReportGenerationFacade {
+public class TimeReportFacade {
 
     private final JiraWorklogService worklogService;
     private final VelocityService velocityService;
     private final HtmlRenderingService imageService;
 
     @Inject
-    public ReportGenerationFacade(JiraWorklogService worklogService,
-                                  VelocityService velocityService,
-                                  HtmlRenderingService imageService) {
+    public TimeReportFacade(JiraWorklogService worklogService,
+                            VelocityService velocityService,
+                            HtmlRenderingService imageService) {
         this.worklogService = worklogService;
         this.velocityService = velocityService;
         this.imageService = imageService;

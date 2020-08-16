@@ -36,12 +36,10 @@ public class JiraWorklogService {
 
     public Stream<Worklog> getUserWorklogs(List<String> userIds, LocalDate startDate, LocalDate endDate) {
         var jqlQuery = getWorklogSearchQuery(userIds, startDate, endDate);
-
-        var users = config.getList("jira.users.list");
         return restApiService.searchQuery(jqlQuery)
                 .stream()
                 .flatMap(this::parseResponse)
-                .filter(worklog -> isValidWorklog(worklog, users, startDate, endDate));
+                .filter(worklog -> isValidWorklog(worklog, userIds, startDate, endDate));
     }
 
     private String getWorklogSearchQuery(List<String> userIds, LocalDate startDate, LocalDate endDate) {

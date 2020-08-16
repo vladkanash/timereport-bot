@@ -1,8 +1,7 @@
 package org.vladkanash;
 
 import dagger.Component;
-import org.vladkanash.slack.facade.ReportGenerationFacade;
-import org.vladkanash.slack.service.SlackService;
+import org.vladkanash.facade.SlackFacade;
 import org.vladkanash.util.Config;
 import org.vladkanash.util.UtilModule;
 
@@ -12,9 +11,7 @@ import javax.inject.Singleton;
 @Singleton
 public interface Context {
 
-    ReportGenerationFacade getTimeReportFacade();
-
-    SlackService getSlackService();
-
     Config getConfig();
+
+    SlackFacade getSlackFacade();
 }
