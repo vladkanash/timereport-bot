@@ -53,7 +53,7 @@ public class SlackFacade {
             return ctx.ack(config.get("slack.slash.command.ack"));
         });
 
-        var server = new SlackAppServer(app, 4390);
+        var server = new SlackAppServer(app);
         server.start();
     }
 
