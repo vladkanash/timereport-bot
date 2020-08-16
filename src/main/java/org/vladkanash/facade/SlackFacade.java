@@ -4,12 +4,15 @@ import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.bolt.context.builtin.SlashCommandContext;
 import com.slack.api.bolt.jetty.SlackAppServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vladkanash.slack.service.SlackService;
 import org.vladkanash.util.Config;
 import org.vladkanash.util.TimeUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +22,12 @@ import java.util.concurrent.Executors;
 @Singleton
 public class SlackFacade {
 
+    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+
     private final TimeReportFacade timeReportFacade;
     private final SlackService slackService;
     private final Config config;
-
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Inject
     public SlackFacade(TimeReportFacade timeReportFacade, Config config, SlackService slackService) {
@@ -58,6 +62,7 @@ public class SlackFacade {
     }
 
     private void generateSlashResponse(LocalDate startDate, LocalDate endDate, SlashCommandContext ctx) {
+        LOG.info("Received slash command from user {}", ctx.getRequestUserId());
         var jiraUserId = getJiraUserId(ctx.getRequestUserId());
         timeReportFacade.getReport(List.of(jiraUserId), startDate, endDate)
                 .map(slackService::generateReportMessage)

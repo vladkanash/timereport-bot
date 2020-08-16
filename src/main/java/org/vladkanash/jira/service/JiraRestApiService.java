@@ -1,10 +1,13 @@
 package org.vladkanash.jira.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vladkanash.util.Config;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,6 +19,8 @@ import java.util.Optional;
 
 @Singleton
 public class JiraRestApiService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final Config config;
     private final HttpClient httpClient;
@@ -34,9 +39,12 @@ public class JiraRestApiService {
         var worklogEndpoint = config.get("jira.rest.endpoint.worklog");
         var worklogUrl = MessageFormat.format(worklogEndpoint, issueCode);
 
+        var uri = URI.create(serverUri + worklogUrl);
+        LOG.info("Sending request to {}", uri);
+
         var request = HttpRequest.newBuilder()
                 .GET()
-                .uri(URI.create(serverUri + worklogUrl))
+                .uri(uri)
                 .header("Content-Type", "application/json")
                 .header("Authorization", basicAuth())
                 .build();
@@ -48,9 +56,11 @@ public class JiraRestApiService {
         var serverUri = config.get("jira.server.uri");
         var searchEndpoint = config.get("jira.rest.endpoint.search");
 
+        var uri = URI.create(serverUri + searchEndpoint);
+        LOG.info("Sending search query request to {}", uri);
         var request = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(query))
-                .uri(URI.create(serverUri + searchEndpoint))
+                .uri(uri)
                 .header("Content-Type", "application/json")
                 .header("Authorization", basicAuth())
                 .build();
@@ -63,7 +73,7 @@ public class JiraRestApiService {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             return Optional.of(response.body());
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            LOG.error("An exception while performing http request to {}", request.uri(), e);
             return Optional.empty();
         }
     }

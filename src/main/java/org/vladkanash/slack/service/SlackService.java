@@ -4,6 +4,8 @@ import com.slack.api.Slack;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.files.FilesSharedPublicURLRequest;
 import com.slack.api.methods.request.files.FilesUploadRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vladkanash.util.Config;
 
 import javax.imageio.ImageIO;
@@ -11,10 +13,12 @@ import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.invoke.MethodHandles;
 
 public class SlackService {
 
-    public static final String IMAGE_NAME = "time-report.png";
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final String IMAGE_NAME = "time-report.png";
 
     private final Config config;
 
@@ -36,16 +40,17 @@ public class SlackService {
             return getMessageBody(publicLink);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("An exception while uploading image to Slack ", e);
             return null;
         }
     }
 
     public void postMessage(String url, String messageBody) {
         try {
+            LOG.info("Posting Slack message to {}", url);
             Slack.getInstance().send(url, messageBody);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("An exception while sending message to Slack", e);
         }
     }
 
@@ -83,7 +88,7 @@ public class SlackService {
             ImageIO.write(pngImage, "png", outputStream);
             return outputStream.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("An exception while converting image to png", e);
         }
         return null;
     }

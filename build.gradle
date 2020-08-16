@@ -24,8 +24,9 @@ dependencies {
     implementation group: 'org.apache.velocity', name: 'velocity', version: '1.7'
     implementation group: 'gui.ava', name: 'html2image', version: '2.0.1'
     implementation group: 'com.slack.api', name: 'bolt-jetty', version: '1.0.10'
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     implementation group: 'com.google.dagger', name: 'dagger', version: '2.28'
+    implementation group: 'org.codehaus.groovy', name: 'groovy', version: '3.0.5'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
@@ -39,11 +40,6 @@ sourceSets.main.java.srcDirs = ['build/generated/sources/annotationProcessor/jav
 
 application {
     mainClassName = 'org.vladkanash.Main'
-}
-
-run {
-    // gradle run -DslackLogLevel=debug
-    systemProperty "org.slf4j.simpleLogger.log.com.slack.api", System.getProperty("slackLogLevel")
 }
 
 test {
