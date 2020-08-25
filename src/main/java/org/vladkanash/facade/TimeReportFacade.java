@@ -8,8 +8,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.awt.image.BufferedImage;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Singleton
 public class TimeReportFacade {
@@ -27,7 +27,7 @@ public class TimeReportFacade {
         this.imageService = imageService;
     }
 
-    public Optional<BufferedImage> getReport(List<String> userIds,
+    public Optional<BufferedImage> getReport(Set<String> userIds,
                                              LocalDate startDate,
                                              LocalDate endDate) {
 

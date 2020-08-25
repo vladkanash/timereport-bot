@@ -28,7 +28,7 @@ public class SlackService {
     }
 
     public void sendReport(BufferedImage image) {
-        var webhookUrl = config.get("slack.url.webhook");
+        var webhookUrl = config.get("slack.webhook");
         var report = generateReportMessage(image);
         postMessage(webhookUrl, report);
     }
@@ -95,7 +95,7 @@ public class SlackService {
 
     private String getMessageBody(String publicLink) {
         var messagePayload = config.get("slack.message.payload");
-        var channelId = config.get("slack.channel.id");
+        var channelId = config.get("slack.channel");
         var attachmentLink = getAttachmentLink(publicLink);
         return String.format(messagePayload, channelId, attachmentLink);
     }

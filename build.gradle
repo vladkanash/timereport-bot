@@ -27,6 +27,7 @@ dependencies {
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     implementation group: 'com.google.dagger', name: 'dagger', version: '2.28'
     implementation group: 'org.codehaus.groovy', name: 'groovy', version: '3.0.5'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.26'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'

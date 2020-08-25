@@ -6,7 +6,7 @@ import dagger.Provides;
 @Module
 public interface UtilModule {
 
-    String CONFIG_PATH = "config.properties";
+    String CONFIG_PATH = "config.yml";
 
     @Provides
     static Config getConfig() {

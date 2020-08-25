@@ -14,8 +14,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,7 +37,7 @@ public class SlackFacade {
     }
 
     public void sendCurrentWeekReport() {
-        var userIds = config.getList("jira.users.list");
+        var userIds = new HashSet<>(config.getMap("users").values());
         var startDate = TimeUtils.getCurrentDayOfWeekDate(1);
         var endDate = TimeUtils.getCurrentDayOfWeekDate(7);
 
@@ -52,9 +52,9 @@ public class SlackFacade {
         var appConfig = getAppConfig();
         var app = new App(appConfig);
 
-        app.command(config.get("slack.slash.command.user.report"), (req, ctx) -> {
+        app.command(config.get("slack.slash-command.user-report.name"), (req, ctx) -> {
             executor.submit(() -> generateSlashResponse(startDate, endDate, ctx));
-            return ctx.ack(config.get("slack.slash.command.ack"));
+            return ctx.ack(config.get("slack.slash-command.user-report.ack"));
         });
 
         var server = new SlackAppServer(app);
@@ -64,13 +64,13 @@ public class SlackFacade {
     private void generateSlashResponse(LocalDate startDate, LocalDate endDate, SlashCommandContext ctx) {
         LOG.info("Received slash command from user {}", ctx.getRequestUserId());
         var jiraUserId = getJiraUserId(ctx.getRequestUserId());
-        timeReportFacade.getReport(List.of(jiraUserId), startDate, endDate)
+        timeReportFacade.getReport(Set.of(jiraUserId), startDate, endDate)
                 .map(slackService::generateReportMessage)
                 .ifPresent(report -> slackService.postMessage(ctx.getResponseUrl(), report));
     }
 
     private String getJiraUserId(String slackUserId) {
-        var userMap = Map.of("slackUserId", "jiraUserId");
+        var userMap = config.getMap("users");
         return userMap.get(slackUserId);
     }
 

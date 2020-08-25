@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +34,7 @@ public class JiraWorklogService {
                 .create();
     }
 
-    public Stream<Worklog> getUserWorklogs(List<String> userIds, LocalDate startDate, LocalDate endDate) {
+    public Stream<Worklog> getUserWorklogs(Set<String> userIds, LocalDate startDate, LocalDate endDate) {
         var jqlQuery = getWorklogSearchQuery(userIds, startDate, endDate);
         return restApiService.searchQuery(jqlQuery)
                 .stream()
@@ -42,8 +42,8 @@ public class JiraWorklogService {
                 .filter(worklog -> isValidWorklog(worklog, userIds, startDate, endDate));
     }
 
-    private String getWorklogSearchQuery(List<String> userIds, LocalDate startDate, LocalDate endDate) {
-        var rawQuery = config.get("jira.rest.worklog.query");
+    private String getWorklogSearchQuery(Set<String> userIds, LocalDate startDate, LocalDate endDate) {
+        var rawQuery = config.get("jira.rest.worklog-query");
 
         var isoStartDate = startDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
         var isoEndDate = endDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -93,7 +93,7 @@ public class JiraWorklogService {
                 .flatMap(Collection::stream);
     }
 
-    private boolean isValidWorklog(Worklog worklog, List<String> users,
+    private boolean isValidWorklog(Worklog worklog, Set<String> users,
                                    LocalDate startDate, LocalDate endDate) {
 
         var isValidName = users.contains(worklog.getAuthor().getAccountId());

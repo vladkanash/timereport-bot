@@ -1,32 +1,70 @@
 package org.vladkanash.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
+import java.util.Map;
 
 @Singleton
 public class Config {
 
-    private final static String LIST_DELIMITER = ",";
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final Properties properties = new Properties();
+    private static final String PATH_SEPARATOR = "\\.";
+
+    private final Map<String, Object> config = new HashMap<>();
 
     @Inject
     public Config(String configPath) {
+        var yaml = new Yaml();
         try (var inputStream = Config.class.getClassLoader().getResourceAsStream(configPath)) {
-            properties.load(Objects.requireNonNull(inputStream));
+            this.config.putAll(yaml.load(inputStream));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("An error occurred while trying to load config", e);
         }
     }
 
     public String get(String key) {
-        return properties.getProperty(key);
+        Object result = getLowestLevelObject(key);
+        if (!(result instanceof String)) {
+            return null;
+        }
+        return (String) result;
     }
 
-    public List<String> getList(String key) {
-        return List.of(get(key).split(LIST_DELIMITER));
+    @SuppressWarnings("unchecked")
+    public Map<String, String> getMap(String key) {
+        Object result = getLowestLevelObject(key);
+        if (!(result instanceof Map)) {
+            return null;
+        }
+        return (Map<String, String>) result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object getLowestLevelObject(String key) {
+        if (key == null) {
+            return null;
+        }
+
+        var keys = key.split(PATH_SEPARATOR);
+        var result = this.config;
+
+        for (int i = 0; i < keys.length - 1; i++) {
+            String k = keys[i];
+            var newResult = result.get(k);
+            if (newResult instanceof Map) {
+                result = (Map<String, Object>) newResult;
+            } else {
+                return null;
+            }
+        }
+
+        return result.get(keys[keys.length - 1]);
     }
 }

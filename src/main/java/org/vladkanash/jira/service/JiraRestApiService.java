@@ -35,7 +35,7 @@ public class JiraRestApiService {
     }
 
     public Optional<String> getWorklogsForIssue(String issueCode) {
-        var serverUri = config.get("jira.server.uri");
+        var serverUri = config.get("jira.rest.server");
         var worklogEndpoint = config.get("jira.rest.endpoint.worklog");
         var worklogUrl = MessageFormat.format(worklogEndpoint, issueCode);
 
@@ -53,7 +53,7 @@ public class JiraRestApiService {
     }
 
     public Optional<String> searchQuery(String query) {
-        var serverUri = config.get("jira.server.uri");
+        var serverUri = config.get("jira.rest.server");
         var searchEndpoint = config.get("jira.rest.endpoint.search");
 
         var uri = URI.create(serverUri + searchEndpoint);

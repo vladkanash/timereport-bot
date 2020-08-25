@@ -1,0 +1,63 @@
+####################################  JIRA CONFIGS  ############################################
+jira:
+    auth:
+        user: user@mail.com
+        token: 1111222233334444
+
+    rest:
+        server: https://jira-cloud-url.com
+        endpoint:
+            search: /rest/api/2/search
+            worklog: /rest/api/2/issue/{0}/worklog
+        worklog-query:
+            '{
+                "jql":
+                    "worklogAuthor in (%s) and
+                     worklogDate >= ''%s'' and
+                     worklogDate <= ''%s''",
+                 "fields": [ "worklog" ],
+                 "maxResults": 1000
+             }'
+
+####################################  SLACK CONFIGS  ############################################
+slack:
+    auth:
+        token: xoxp-1234567890
+        secret: 1.2345123451234513E19
+
+    channel: channel123
+    webhook: https://hooks.slack.com/services/1234567890
+
+    image:
+        comment: ''
+        publicUrl:
+            regex: https://slack-files.com/(.*?)-(.*?)-(.*?)
+            template: https://slack-files.com/files-pri/$1-$2/time-report.png?pub_secret=$3
+
+    message:
+        payload: '{
+                    "channel": "%s",
+                    "blocks": [
+                      {
+                        "type": "image",
+                        "title": {
+                          "type": "plain_text",
+                          "text": "Daily JIRA worklog summary"
+                        },
+                        "image_url": "%s",
+                        "alt_text": "timeReport"
+                      }
+                    ]
+                  }'
+
+    slash-command:
+        user-report:
+            name: /report
+            ack: Your report is being generated...
+
+####################################  USERS LIST  ############################################
+users:
+    slack123: userAccount12345
+    slack437: userAccount12556
+    slack126: userAccount13784
+    slack456: userAccount54321
