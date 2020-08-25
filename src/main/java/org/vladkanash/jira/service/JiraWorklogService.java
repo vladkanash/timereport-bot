@@ -39,7 +39,7 @@ public class JiraWorklogService {
         return restApiService.searchQuery(jqlQuery)
                 .stream()
                 .flatMap(this::parseResponse)
-                .filter(worklog -> isValidWorklog(worklog, userIds, startDate, endDate));
+                .filter(worklog -> isValidWorklog(worklog, userIds, startDate));
     }
 
     private String getWorklogSearchQuery(Set<String> userIds, LocalDate startDate, LocalDate endDate) {
@@ -94,13 +94,11 @@ public class JiraWorklogService {
     }
 
     private boolean isValidWorklog(Worklog worklog, Set<String> users,
-                                   LocalDate startDate, LocalDate endDate) {
+                                   LocalDate startDate) {
 
         var isValidName = users.contains(worklog.getAuthor().getAccountId());
         var submitDate = worklog.getSubmissionDate();
 
-        return submitDate.isBefore(endDate.plusDays(1).atStartOfDay())
-                && submitDate.isAfter(startDate.atStartOfDay())
-                && isValidName;
+        return submitDate.isAfter(startDate.atStartOfDay()) && isValidName;
     }
 }
