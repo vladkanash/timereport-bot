@@ -1,5 +1,7 @@
 plugins {
     id 'application'
+    id "com.palantir.docker" version "0.22.1"
+    id "com.palantir.docker-run" version "0.22.1"
 }
 
 java {
@@ -8,7 +10,7 @@ java {
 }
 
 group 'org.vladkanash'
-version '0.1.0-SNAPSHOT'
+version '0.1.0'
 
 sourceCompatibility = 11
 
@@ -45,4 +47,16 @@ application {
 
 test {
     useJUnitPlatform()
+}
+
+docker {
+    name "${project.name}:${project.version}"
+    files tasks.distTar.outputs   // adds resulting *.tgz to the build context
+}
+
+dockerRun {
+    name "${project.name}"
+    image "${project.name}:${project.version}"
+    ports '3000:3000'
+    clean true
 }
