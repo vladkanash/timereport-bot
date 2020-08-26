@@ -16,7 +16,7 @@
         }
 
         html * {
-            font-weight: bold;
+            font-weight: normal;
             font-size: 16px;
             color: #353535 !important;
             font-family: Arial, sans-serif !important;
@@ -45,6 +45,10 @@
             width: 50px;
         }
 
+        td.user-name {
+            font-weight: bolder;
+        }
+
         div.submitted-minutes {
             float:right;
             padding: 5px 0;
@@ -58,12 +62,12 @@
         td.submitted-5,
         td.submitted-6,
         td.submitted-7 {
-            font-size: 28px;
+            font-size: 32px;
             background-color: #ffe952;
         }
 
         td.submitted-8 {
-            font-size: 28px;
+            font-size: 32px;
             background-color: #3fff99;
         }
 
@@ -73,17 +77,17 @@
         td.submitted-12,
         td.submitted-13,
         td.submitted-14 {
-            font-size: 28px;
+            font-size: 32px;
             background-color: #008942;
         }
 
         td.total-hours {
-            font-size: 24px;
+            font-size: 28px;
         }
 
         td.submitted-0.past {
             width: 50px !important;
-            font-size: 28px;
+            font-size: 32px;
             background-color: #f08080;
         }
     </style>
