@@ -9,7 +9,7 @@ jira:
         endpoint:
             search: /rest/api/2/search
             worklog: /rest/api/2/issue/{0}/worklog
-        worklog-query:
+        worklogQuery:
             '{
                 "jql":
                     "worklogAuthor in (%s) and
@@ -27,6 +27,8 @@ slack:
 
     channel: channel123
     webhook: https://hooks.slack.com/services/1234567890
+
+    reportRate: '86400000'
 
     image:
         comment: ''
@@ -50,8 +52,8 @@ slack:
                     ]
                   }'
 
-    slash-command:
-        user-report:
+    slashCommand:
+        userReport:
             name: /report
             ack: Your report is being generated...
 

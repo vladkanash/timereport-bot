@@ -52,9 +52,9 @@ public class SlackFacade {
         var appConfig = getAppConfig();
         var app = new App(appConfig);
 
-        app.command(config.get("slack.slash-command.user-report.name"), (req, ctx) -> {
+        app.command(config.get("slack.slashCommand.userReport.name"), (req, ctx) -> {
             executor.submit(() -> generateSlashResponse(startDate, endDate, ctx));
-            return ctx.ack(config.get("slack.slash-command.user-report.ack"));
+            return ctx.ack(config.get("slack.slashCommand.userReport.ack"));
         });
 
         var server = new SlackAppServer(app);

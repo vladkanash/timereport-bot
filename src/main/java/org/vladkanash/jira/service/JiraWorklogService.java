@@ -43,7 +43,7 @@ public class JiraWorklogService {
     }
 
     private String getWorklogSearchQuery(Set<String> userIds, LocalDate startDate, LocalDate endDate) {
-        var rawQuery = config.get("jira.rest.worklog-query");
+        var rawQuery = config.get("jira.rest.worklogQuery");
 
         var isoStartDate = startDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
         var isoEndDate = endDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
