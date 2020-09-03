@@ -26,13 +26,14 @@ public class Config {
             this.config.putAll(yaml.load(inputStream));
         } catch (Exception e) {
             LOG.error("An error occurred while trying to load config", e);
+            throw new IllegalStateException(e);
         }
     }
 
     public String get(String key) {
         Object result = getLowestLevelObject(key);
         if (!(result instanceof String)) {
-            return null;
+            throw new IllegalArgumentException("No String value exists for such key: " + key);
         }
         return (String) result;
     }
@@ -41,7 +42,7 @@ public class Config {
     public Map<String, String> getMap(String key) {
         Object result = getLowestLevelObject(key);
         if (!(result instanceof Map)) {
-            return null;
+            throw new IllegalArgumentException("No Map<String, String> value exists for such key: " + key);
         }
         return (Map<String, String>) result;
     }
@@ -49,7 +50,7 @@ public class Config {
     @SuppressWarnings("unchecked")
     private Object getLowestLevelObject(String key) {
         if (key == null) {
-            return null;
+            throw new IllegalArgumentException("key is null");
         }
 
         var keys = key.split(PATH_SEPARATOR);
@@ -61,7 +62,7 @@ public class Config {
             if (newResult instanceof Map) {
                 result = (Map<String, Object>) newResult;
             } else {
-                return null;
+                throw new IllegalArgumentException("No value exists for such key: " + key);
             }
         }
 

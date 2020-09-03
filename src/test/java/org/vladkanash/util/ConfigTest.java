@@ -9,13 +9,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class ConfigTest {
 
     public static final String CONFIG = "config";
-    public static final String TEST_PATH = "config.properties";
+    public static final String TEST_PATH = "config.yml";
     public static final String TOKEN = "1234567890";
 
     private final static Map<String, String> USERS_MAP = Map.of(
@@ -48,33 +48,39 @@ class ConfigTest {
     }
 
     @Test
-    void shouldReturnNullIfPropertyNotFound1() {
-        assertNull(testedInstance.get("jira.auth.invalid.property"));
+    void shouldThrowExceptionIfPropertyNotFound1() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testedInstance.get("jira.auth.invalid.property"));
     }
 
     @Test
-    void shouldReturnNullIfPropertyNotFound2() {
-        assertNull(testedInstance.get("jira.auth.token.id"));
+    void shouldThrowExceptionIfPropertyNotFound2() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testedInstance.get("jira.auth.token.id"));
     }
 
     @Test
-    void shouldReturnNullIfPropertyNotFound3() {
-        assertNull(testedInstance.get("invalid"));
+    void shouldThrowExceptionIfPropertyNotFound3() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testedInstance.get("invalid"));
     }
 
     @Test
-    void shouldReturnNullIfPropertyNotFound4() {
-        assertNull(testedInstance.get("invalid."));
+    void shouldThrowExceptionIfPropertyNotFound4() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testedInstance.get("invalid."));
     }
 
     @Test
-    void shouldReturnNullIfPropertyNotString() {
-        assertNull(testedInstance.get("jira.auth"));
+    void shouldThrowExceptionIfPropertyNotString() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testedInstance.get("jira.auth"));
     }
 
     @Test
-    void shouldReturnNullIfKeyIsNull() {
-        assertNull(testedInstance.get(null));
+    void shouldThrowExceptionIfKeyIsNull() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testedInstance.get(null));
     }
 
     @Test
@@ -83,7 +89,8 @@ class ConfigTest {
     }
 
     @Test
-    void shouldReturnNullIfConfigMapPropertyNotFound() {
-        assertNull(testedInstance.getMap("test.values"));
+    void shouldThrowExceptionIfConfigMapPropertyNotFound() {
+        assertThrows(IllegalArgumentException.class,
+                () -> testedInstance.getMap("test.values"));
     }
 }
