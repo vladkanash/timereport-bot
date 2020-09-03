@@ -28,6 +28,8 @@ slack:
     channel: channel123
     webhook: https://hooks.slack.com/services/1234567890
 
+    reportSchedule: 0 14 * * 2,5
+
     image:
         comment: ''
         publicUrl:
