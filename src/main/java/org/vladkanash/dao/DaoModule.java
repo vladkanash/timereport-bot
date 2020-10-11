@@ -7,5 +7,5 @@ import dagger.Module;
 public interface DaoModule {
 
     @Binds
-    UserDao bindUserDao(DefaultUserDao defaultUserDao);
+    UserDao bindUserDao(AirtableUserDao airtableUserDao);
 }

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Singleton
-public class DefaultUserDao implements UserDao {
+public class AirtableUserDao implements UserDao {
 
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -24,7 +24,7 @@ public class DefaultUserDao implements UserDao {
     private final Airtable airtable;
 
     @Inject
-    public DefaultUserDao(Config config) {
+    public AirtableUserDao(Config config) {
         this.config = config;
         this.airtable = getAirtable();
     }
