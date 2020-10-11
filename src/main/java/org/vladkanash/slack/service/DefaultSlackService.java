@@ -6,7 +6,7 @@ import com.slack.api.methods.request.files.FilesSharedPublicURLRequest;
 import com.slack.api.methods.request.files.FilesUploadRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vladkanash.util.Config;
+import org.vladkanash.config.Config;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;

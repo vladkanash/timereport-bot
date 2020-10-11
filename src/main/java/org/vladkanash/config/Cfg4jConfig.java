@@ -1,4 +1,4 @@
-package org.vladkanash.util;
+package org.vladkanash.config;
 
 import org.cfg4j.provider.ConfigurationProvider;
 import org.cfg4j.provider.ConfigurationProviderBuilder;
@@ -15,15 +15,16 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
-public class Config {
+public class Cfg4jConfig implements Config {
 
     private final ConfigurationProvider configurationProvider;
 
     @Inject
-    public Config(String configPath) {
+    public Cfg4jConfig(String configPath) {
         this.configurationProvider = getProvider(configPath);
     }
 
+    @Override
     public String get(String key) {
         return configurationProvider.getProperty(key, String.class);
     }

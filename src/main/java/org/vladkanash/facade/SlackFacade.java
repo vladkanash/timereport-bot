@@ -6,10 +6,10 @@ import com.slack.api.bolt.context.builtin.SlashCommandContext;
 import com.slack.api.bolt.jetty.SlackAppServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vladkanash.config.Config;
 import org.vladkanash.dao.User;
 import org.vladkanash.dao.UserDao;
 import org.vladkanash.slack.service.SlackService;
-import org.vladkanash.util.Config;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

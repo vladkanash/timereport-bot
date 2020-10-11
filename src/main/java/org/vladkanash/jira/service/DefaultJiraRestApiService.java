@@ -2,7 +2,7 @@ package org.vladkanash.jira.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vladkanash.util.Config;
+import org.vladkanash.config.Config;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

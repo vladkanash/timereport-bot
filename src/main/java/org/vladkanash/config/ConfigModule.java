@@ -1,4 +1,4 @@
-package org.vladkanash.util;
+package org.vladkanash.config;
 
 import dagger.Module;
 import dagger.Provides;
@@ -10,6 +10,6 @@ public interface ConfigModule {
 
     @Provides
     static Config getConfig() {
-        return new Config(CONFIG_PATH);
+        return new Cfg4jConfig(CONFIG_PATH);
     }
 }

@@ -1,4 +1,4 @@
-package org.vladkanash.util;
+package org.vladkanash.config;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,11 +33,11 @@ class ConfigTest {
             Map.of("users", USERS_MAP)
     );
 
-    private Config testedInstance;
+    private Cfg4jConfig testedInstance;
 
     @BeforeEach
     void setUp() throws NoSuchFieldException {
-        testedInstance = new Config(TEST_PATH);
+        testedInstance = new Cfg4jConfig(TEST_PATH);
         FieldSetter.setField(testedInstance,
                 testedInstance.getClass().getDeclaredField(CONFIG), CONFIG_MAP);
     }

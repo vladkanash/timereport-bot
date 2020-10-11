@@ -1,12 +1,12 @@
 package org.vladkanash;
 
 import dagger.Component;
+import org.vladkanash.config.Config;
+import org.vladkanash.config.ConfigModule;
 import org.vladkanash.dao.DaoModule;
 import org.vladkanash.facade.SlackFacade;
 import org.vladkanash.jira.JiraModule;
 import org.vladkanash.slack.SlackModule;
-import org.vladkanash.util.Config;
-import org.vladkanash.util.ConfigModule;
 
 import javax.inject.Singleton;
 
