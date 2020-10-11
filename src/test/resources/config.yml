@@ -1,4 +1,4 @@
-####################################  JIRA CONFIGS  ############################################
+####################################  JIRA  ############################################
 jira:
     auth:
         user: user@mail.com
@@ -9,7 +9,7 @@ jira:
         endpoint:
             search: /rest/api/2/search
             worklog: /rest/api/2/issue/{0}/worklog
-        worklog-query:
+        worklogQuery:
             '{
                 "jql":
                     "worklogAuthor in (%s) and
@@ -19,7 +19,7 @@ jira:
                  "maxResults": 1000
              }'
 
-####################################  SLACK CONFIGS  ############################################
+####################################  SLACK  ############################################
 slack:
     auth:
         token: xoxp-1234567890
@@ -52,14 +52,14 @@ slack:
                     ]
                   }'
 
-    slash-command:
-        user-report:
+    slashCommand:
+        userReport:
             name: /report
             ack: Your report is being generated...
 
-####################################  USERS LIST  ############################################
-users:
-    slack123: userAccount12345
-    slack437: userAccount12556
-    slack126: userAccount13784
-    slack456: userAccount54321
+####################################  AIRTABLE  ############################################
+
+airtable:
+    apikey: 'airtable-api-key'
+    base: 'airtable-base-id'
+    table: 'airtable-table-name'
