@@ -10,12 +10,14 @@ import org.vladkanash.dao.User;
 import org.vladkanash.dao.UserDao;
 import org.vladkanash.slack.service.SlackService;
 import org.vladkanash.util.Config;
-import org.vladkanash.util.TimeUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.lang.invoke.MethodHandles;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalField;
+import java.time.temporal.WeekFields;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -46,8 +48,8 @@ public class SlackFacade {
 
     public void sendCurrentWeekReport() {
         var userIds = getUserJiraIds();
-        var startDate = TimeUtils.getCurrentDayOfWeekDate(1);
-        var endDate = TimeUtils.getCurrentDayOfWeekDate(7);
+        var startDate = getCurrentDayOfWeekDate(1);
+        var endDate = getCurrentDayOfWeekDate(7);
 
         timeReportFacade.getReport(userIds, startDate, endDate)
                 .ifPresent(slackService::sendReport);
@@ -60,8 +62,8 @@ public class SlackFacade {
     }
 
     public void startSlackServer() throws Exception {
-        var startDate = TimeUtils.getCurrentDayOfWeekDate(1);
-        var endDate = TimeUtils.getCurrentDayOfWeekDate(7);
+        var startDate = getCurrentDayOfWeekDate(1);
+        var endDate = getCurrentDayOfWeekDate(7);
 
         var appConfig = getAppConfig();
         var app = new App(appConfig);
@@ -73,6 +75,12 @@ public class SlackFacade {
 
         var server = new SlackAppServer(app);
         server.start();
+    }
+
+    private LocalDate getCurrentDayOfWeekDate(int dayOfWeek) {
+        LocalDate now = LocalDate.now();
+        TemporalField tempField = WeekFields.of(DayOfWeek.MONDAY, 1).dayOfWeek();
+        return now.with(tempField, dayOfWeek);
     }
 
     private void generateSlashResponse(LocalDate startDate, LocalDate endDate, SlashCommandContext ctx) {

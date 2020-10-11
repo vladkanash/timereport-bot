@@ -5,11 +5,11 @@ import org.vladkanash.rendering.context.LoggedTimeData;
 import org.vladkanash.rendering.context.MonthData;
 import org.vladkanash.rendering.context.UserWorklogData;
 import org.vladkanash.rendering.context.WorklogSummary;
-import org.vladkanash.util.TimeUtils;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class WorklogContextConverter {
 
     private List<MonthData> getMonthData(Stream<LocalDate> dates) {
         return dates
-                .map(TimeUtils::getDisplayMonth)
+                .map(this::getDisplayMonth)
                 .collect(Collectors.toMap(Function.identity(), m -> 1, Integer::sum, LinkedHashMap::new))
                 .entrySet()
                 .stream()
@@ -63,7 +63,7 @@ public class WorklogContextConverter {
 
     private List<String> getDayNames(Stream<LocalDate> dates) {
         return dates
-                .map(TimeUtils::getDisplayDay)
+                .map(this::getDisplayDay)
                 .collect(Collectors.toList());
     }
 
@@ -98,7 +98,7 @@ public class WorklogContextConverter {
                                 getSubmittedSeconds(reportedTime.get(date)) > 0
                 )
                 .collect(Collectors.toMap(
-                        TimeUtils::getDisplayDay,
+                        this::getDisplayDay,
                         date -> getTotalTime(reportedTime.get(date))));
     }
 
@@ -123,5 +123,13 @@ public class WorklogContextConverter {
         return userWorklogs.stream()
                 .mapToInt(Worklog::getReportedSeconds)
                 .sum();
+    }
+
+    private String getDisplayDay(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("EEE, dd"));
+    }
+
+    private String getDisplayMonth(LocalDate date) {
+        return date.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
     }
 }
