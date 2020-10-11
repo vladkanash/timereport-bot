@@ -3,10 +3,10 @@ package org.vladkanash.config;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,9 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class ConfigTest {
 
-    public static final String CONFIG = "config";
     public static final String TEST_PATH = "config.yml";
-    public static final String TOKEN = "1234567890";
+    public static final String TOKEN = "1111222233334444";
 
     private final static Map<String, String> USERS_MAP = Map.of(
             "user1", "id1",
@@ -36,10 +35,8 @@ class ConfigTest {
     private Cfg4jConfig testedInstance;
 
     @BeforeEach
-    void setUp() throws NoSuchFieldException {
+    void setUp() {
         testedInstance = new Cfg4jConfig(TEST_PATH);
-        FieldSetter.setField(testedInstance,
-                testedInstance.getClass().getDeclaredField(CONFIG), CONFIG_MAP);
     }
 
     @Test
@@ -49,37 +46,37 @@ class ConfigTest {
 
     @Test
     void shouldThrowExceptionIfPropertyNotFound1() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> testedInstance.get("jira.auth.invalid.property"));
     }
 
     @Test
     void shouldThrowExceptionIfPropertyNotFound2() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> testedInstance.get("jira.auth.token.id"));
     }
 
     @Test
     void shouldThrowExceptionIfPropertyNotFound3() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> testedInstance.get("invalid"));
     }
 
     @Test
     void shouldThrowExceptionIfPropertyNotFound4() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> testedInstance.get("invalid."));
     }
 
     @Test
     void shouldThrowExceptionIfPropertyNotString() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NoSuchElementException.class,
                 () -> testedInstance.get("jira.auth"));
     }
 
     @Test
     void shouldThrowExceptionIfKeyIsNull() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NullPointerException.class,
                 () -> testedInstance.get(null));
     }
 }
