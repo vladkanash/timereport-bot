@@ -1,71 +1,48 @@
 package org.vladkanash.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
+import org.cfg4j.provider.ConfigurationProvider;
+import org.cfg4j.provider.ConfigurationProviderBuilder;
+import org.cfg4j.source.ConfigurationSource;
+import org.cfg4j.source.classpath.ClasspathConfigurationSource;
+import org.cfg4j.source.compose.MergeConfigurationSource;
+import org.cfg4j.source.context.filesprovider.ConfigFilesProvider;
+import org.cfg4j.source.reload.strategy.PeriodicalReloadStrategy;
+import org.cfg4j.source.system.EnvironmentVariablesConfigurationSource;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class Config {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-
-    private static final String PATH_SEPARATOR = "\\.";
-
-    private final Map<String, Object> config = new HashMap<>();
+    private final ConfigurationProvider configurationProvider;
 
     @Inject
     public Config(String configPath) {
-        var yaml = new Yaml();
-        try (var inputStream = Config.class.getClassLoader().getResourceAsStream(configPath)) {
-            this.config.putAll(yaml.load(inputStream));
-        } catch (Exception e) {
-            LOG.error("An error occurred while trying to load config", e);
-            throw new IllegalStateException(e);
-        }
+        this.configurationProvider = getProvider(configPath);
     }
 
     public String get(String key) {
-        Object result = getLowestLevelObject(key);
-        if (!(result instanceof String)) {
-            throw new IllegalArgumentException("No String value exists for such key: " + key);
-        }
-        return (String) result;
+        return configurationProvider.getProperty(key, String.class);
     }
 
-    @SuppressWarnings("unchecked")
-    public Map<String, String> getMap(String key) {
-        Object result = getLowestLevelObject(key);
-        if (!(result instanceof Map)) {
-            throw new IllegalArgumentException("No Map<String, String> value exists for such key: " + key);
-        }
-        return (Map<String, String>) result;
+    private ConfigurationProvider getProvider(String configPath) {
+        var configSource = getConfigSource(configPath);
+        var reloadStrategy = new PeriodicalReloadStrategy(5, TimeUnit.MINUTES);
+
+        return new ConfigurationProviderBuilder()
+                .withConfigurationSource(configSource)
+                .withReloadStrategy(reloadStrategy)
+                .build();
     }
 
-    @SuppressWarnings("unchecked")
-    private Object getLowestLevelObject(String key) {
-        if (key == null) {
-            throw new IllegalArgumentException("key is null");
-        }
+    private ConfigurationSource getConfigSource(String configPath) {
+        ConfigFilesProvider configFilesProvider = () -> Paths.get(configPath);
+        var fileSource = new ClasspathConfigurationSource(configFilesProvider);
+        var envSource = new EnvironmentVariablesConfigurationSource();
 
-        var keys = key.split(PATH_SEPARATOR);
-        var result = this.config;
-
-        for (int i = 0; i < keys.length - 1; i++) {
-            String k = keys[i];
-            var newResult = result.get(k);
-            if (newResult instanceof Map) {
-                result = (Map<String, Object>) newResult;
-            } else {
-                throw new IllegalArgumentException("No value exists for such key: " + key);
-            }
-        }
-
-        return result.get(keys[keys.length - 1]);
+        return new MergeConfigurationSource(fileSource, envSource);
     }
 }

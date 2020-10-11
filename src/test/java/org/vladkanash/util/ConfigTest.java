@@ -82,15 +82,4 @@ class ConfigTest {
         assertThrows(IllegalArgumentException.class,
                 () -> testedInstance.get(null));
     }
-
-    @Test
-    void shouldReturnConfigMapProperty() {
-        assertEquals(USERS_MAP, testedInstance.getMap("test.users"));
-    }
-
-    @Test
-    void shouldThrowExceptionIfConfigMapPropertyNotFound() {
-        assertThrows(IllegalArgumentException.class,
-                () -> testedInstance.getMap("test.values"));
-    }
 }

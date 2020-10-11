@@ -4,7 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public interface UtilModule {
+public interface ConfigModule {
 
     String CONFIG_PATH = "config.yml";
 
