@@ -16,6 +16,7 @@ sourceCompatibility = 11
 
 repositories {
     mavenCentral()
+    jcenter()
     maven {
         url "https://repo.spring.io/plugins-release/"
     }
@@ -32,6 +33,7 @@ dependencies {
     implementation group: 'org.yaml', name: 'snakeyaml', version: '1.26'
     implementation group: 'it.sauronsoftware.cron4j', name: 'cron4j', version: '2.2.5'
     implementation group: 'org.cfg4j', name: 'cfg4j-core', version: '4.4.1'
+    implementation group: 'com.sybit', name: 'airtable.java', version: ' 0.2.0'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.6.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'

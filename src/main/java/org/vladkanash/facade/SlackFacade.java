@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,14 +77,16 @@ public class SlackFacade {
 
     private void generateSlashResponse(LocalDate startDate, LocalDate endDate, SlashCommandContext ctx) {
         LOG.info("Received slash command from user {}", ctx.getRequestUserId());
-        var jiraUserId = getJiraUserId(ctx.getRequestUserId());
-        timeReportFacade.getReport(Set.of(jiraUserId), startDate, endDate)
+        getJiraUserId(ctx.getRequestUserId())
+                .map(Set::of)
+                .flatMap(userId -> timeReportFacade.getReport(userId, startDate, endDate))
                 .map(slackService::generateReportMessage)
                 .ifPresent(report -> slackService.postMessage(ctx.getResponseUrl(), report));
     }
 
-    private String getJiraUserId(String slackUserId) {
-        return userDao.getUserBySlackId(slackUserId).getJiraId();
+    private Optional<String> getJiraUserId(String slackUserId) {
+        return userDao.getUserBySlackId(slackUserId)
+                .map(User::getJiraId);
     }
 
     private AppConfig getAppConfig() {
