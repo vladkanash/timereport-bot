@@ -6,6 +6,8 @@ import com.slack.api.bolt.context.builtin.SlashCommandContext;
 import com.slack.api.bolt.jetty.SlackAppServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.vladkanash.dao.User;
+import org.vladkanash.dao.UserDao;
 import org.vladkanash.slack.service.SlackService;
 import org.vladkanash.util.Config;
 import org.vladkanash.util.TimeUtils;
@@ -14,10 +16,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.lang.invoke.MethodHandles;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Singleton
 public class SlackFacade {
@@ -28,21 +30,32 @@ public class SlackFacade {
     private final TimeReportFacade timeReportFacade;
     private final SlackService slackService;
     private final Config config;
+    private final UserDao userDao;
 
     @Inject
-    public SlackFacade(TimeReportFacade timeReportFacade, Config config, SlackService slackService) {
+    public SlackFacade(TimeReportFacade timeReportFacade,
+                       Config config,
+                       SlackService slackService,
+                       UserDao userDao) {
         this.timeReportFacade = timeReportFacade;
         this.slackService = slackService;
         this.config = config;
+        this.userDao = userDao;
     }
 
     public void sendCurrentWeekReport() {
-        var userIds = new HashSet<>(config.getMap("users").values());
+        var userIds = getUserJiraIds();
         var startDate = TimeUtils.getCurrentDayOfWeekDate(1);
         var endDate = TimeUtils.getCurrentDayOfWeekDate(7);
 
         timeReportFacade.getReport(userIds, startDate, endDate)
                 .ifPresent(slackService::sendReport);
+    }
+
+    private Set<String> getUserJiraIds() {
+        return userDao.getAllUsers().stream()
+                .map(User::getJiraId)
+                .collect(Collectors.toSet());
     }
 
     public void startSlackServer() throws Exception {
@@ -70,8 +83,7 @@ public class SlackFacade {
     }
 
     private String getJiraUserId(String slackUserId) {
-        var userMap = config.getMap("users");
-        return userMap.get(slackUserId);
+        return userDao.getUserBySlackId(slackUserId).getJiraId();
     }
 
     private AppConfig getAppConfig() {
