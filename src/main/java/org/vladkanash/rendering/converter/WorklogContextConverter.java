@@ -21,6 +21,9 @@ import java.util.stream.Stream;
 @Singleton
 public class WorklogContextConverter {
 
+    private static final int SHORT_MONTH_THRESHOLD = 2;
+    private static final int SHORT_MONTH_LENGTH = 3;
+
     @Inject
     public WorklogContextConverter() {
     }
@@ -50,7 +53,10 @@ public class WorklogContextConverter {
 
     private MonthData createMonthData(Map.Entry<String, Integer> entry) {
         var month = new MonthData();
-        month.setName(entry.getKey());
+        var name = entry.getValue() > SHORT_MONTH_THRESHOLD ?
+                entry.getKey() : entry.getKey().substring(0, SHORT_MONTH_LENGTH);
+
+        month.setName(name);
         month.setDaysCount(entry.getValue());
         return month;
     }
