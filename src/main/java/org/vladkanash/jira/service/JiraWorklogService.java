@@ -2,10 +2,10 @@ package org.vladkanash.jira.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.vladkanash.gson.adapter.LocalDateTimeAdapter;
 import org.vladkanash.jira.entity.Issue;
 import org.vladkanash.jira.entity.Worklog;
 import org.vladkanash.jira.entity.WorklogSearchResponse;
+import org.vladkanash.jira.gson.adapter.LocalDateTimeAdapter;
 import org.vladkanash.util.Config;
 
 import javax.inject.Inject;

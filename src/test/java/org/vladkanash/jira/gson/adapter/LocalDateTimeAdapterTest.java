@@ -1,4 +1,4 @@
-package org.vladkanash.gson.adapter;
+package org.vladkanash.jira.gson.adapter;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
